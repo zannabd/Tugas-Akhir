@@ -1,129 +1,119 @@
-import logo from "../../assets/Al-Ihsan.png";
+import React, { useState } from "react";
 import styled from "styled-components";
-import { NavLink } from "react-router-dom";
+import logo from "../../assets/Al-Ihsan.png";
 
 const StyledNavbar = styled.div`
   background-color: #53a548;
-
+  padding: 10px 20px;
   nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 0rem 1rem;
   }
+
   #brand {
     display: flex;
+    align-items: center;
   }
 
   #brand img {
-    display: flex;
-    flex-shrink: 0;
     width: 50px;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-right: 10px;
+  }
+
+  .listnav {
+    display: flex;
     align-items: center;
   }
+
   a {
-    margin: 1rem;
+    margin: 0 1rem;
     text-decoration: none;
+    color: white;
+    font-size: 1rem;
   }
 
   button {
     background-color: #eee82c;
-    padding: 0rem 1rem 0.2rem;
+    padding: 0.2rem 1rem;
     border: 1px solid white;
     border-radius: 5px;
     font-weight: bold;
+    cursor: pointer;
+    align-items: center;
+  }
+
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+  }
+
+  .dropdown-menu {
+    display: none;
+    flex-direction: column;
+    background: #2e7d32;
+    position: absolute;
+    padding: 1rem 1rem;
+    top: 60px;
+    right: 10px;
+    width: 200px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .dropdown-menu a {
+    padding: 0.3rem;
+    text-align: center;
+  }
+
+  .dropdown-menu.show {
+    display: flex;
+  }
+
+  @media (max-width: 768px) {
+    .listnav {
+      display: none;
+    }
+
+    .menu-toggle {
+      display: block;
+    }
   }
 `;
 
 export default function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <StyledNavbar>
-      <>
-        <nav>
-          <div id="brand">
-            <img src={logo}></img>
-            {/* <span className="fs-1 fw-bold">Han-WIKI</span> */}
-            <h1 className="ms-2 d-flex align-items-center text-white">
-              Masjid Al Ihsan
-            </h1>
-          </div>
-          <div className="listnav">
-            <a href="#" className="text-white mx-3">
-              Home
-            </a>
-            <a href="#" className="text-white mx-3">
-              Information
-            </a>
-            <a href="#" className="text-white mx-3">
-              About
-            </a>
-            <button>Login</button>
-          </div>
-          {/* <ul className="navbar-list">
-            <li id="navbar-item">
-              <NavLink
-                className="text-decoration-none"
-                id="list"
-                exact="true"
-                to="/"
-                activeclassname="active"
-              >
-                Home
-              </NavLink>
-            </li>
-            <li className="dropdown" id="navbar-item">
-              <button className="dropbtn">Movie</button>
-              <ul className="dropdown-menu">
-                <li>
-                  <NavLink
-                    className="dropdown-item"
-                    to="/movie/korea"
-                    activeclassname="active"
-                  >
-                    Korea
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    className="dropdown-item"
-                    to="movie/jepang"
-                    activeclassname="active"
-                  >
-                    Jepang
-                  </NavLink>
-                </li>
-              </ul>
-            </li>
-            <li id="navbar-item">
-              <NavLink className="text-decoration-none" id="list" to="create">
-                Create
-              </NavLink>
-            </li>
-            <li id="navbar-item">
-              <NavLink
-                className="text-decoration-none"
-                id="list"
-                to="openai"
-                activeclassname="active"
-              >
-                OpenAI
-              </NavLink>
-            </li>
-            <li id="navbar-item">
-              <NavLink
-                className="text-decoration-none"
-                id="list"
-                to="about"
-                activeclassname="active"
-              >
-                About
-              </NavLink>
-            </li>
-          </ul> */}
-        </nav>
-      </>
+      <nav>
+        <div id="brand">
+          <img src={logo} alt="Logo Masjid" />
+          <h1 className="text-white">Masjid Al Ihsan</h1>
+        </div>
+
+        <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+          ☰
+        </button>
+
+        <div className={`dropdown-menu ${menuOpen ? "show" : ""}`}>
+          <a href="#">Home</a>
+          <a href="#">Information</a>
+          <a href="#">About</a>
+          <button>Login</button>
+        </div>
+
+        <div className="listnav">
+          <a href="#">Home</a>
+          <a href="#">Information</a>
+          <a href="#">About</a>
+          <button>Login</button>
+        </div>
+      </nav>
     </StyledNavbar>
   );
 }
