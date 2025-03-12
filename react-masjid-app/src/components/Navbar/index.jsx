@@ -5,6 +5,7 @@ import logo from "../../assets/Al-Ihsan.png";
 const StyledNavbar = styled.div`
   background-color: #53a548;
   padding: 10px 20px;
+  position: relative;
   nav {
     display: flex;
     align-items: center;
@@ -19,6 +20,7 @@ const StyledNavbar = styled.div`
   #brand img {
     width: 50px;
     margin-right: 10px;
+    border-radius: 10px;
   }
 
   .listnav {
@@ -62,6 +64,7 @@ const StyledNavbar = styled.div`
     right: 10px;
     width: 200px;
     border-radius: 10px;
+    z-index: 9999;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   }
 
