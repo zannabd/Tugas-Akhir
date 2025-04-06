@@ -35,7 +35,7 @@ export default function Information() {
   return (
     <StyledInformation>
       <>
-        <h1 className="text-center mt-3 mb-3">Informasi</h1>
+        <h1 className="text-center mt-3 mb-3" id="information">Informasi</h1>
         <div className="card-information">
           <Card style={{ width: "18rem" }} className="card-container">
             <Card.Img variant="top" src={kegiatan} className="card-img" />

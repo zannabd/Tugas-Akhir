@@ -1,11 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import logo from "../../assets/Al-Ihsan.png";
+import { Link } from "react-scroll";
 
 const StyledNavbar = styled.div`
   background-color: #53a548;
   padding: 10px 20px;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999999;
+  transition: all 0.3s ease-in-out;
+  box-shadow: ${(props) =>
+    props.isScrolled ? "0px 4px 10px rgba(0, 0, 0, 0.3)" : "none"};
   nav {
     display: flex;
     align-items: center;
@@ -28,11 +37,12 @@ const StyledNavbar = styled.div`
     align-items: center;
   }
 
-  a {
+  .listlink {
     margin: 0 1rem;
     text-decoration: none;
     color: white;
     font-size: 1rem;
+    cursor: pointer;
   }
 
   button {
@@ -68,7 +78,7 @@ const StyledNavbar = styled.div`
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   }
 
-  .dropdown-menu a {
+  .dropdown-menu .listlink {
     padding: 0.3rem;
     text-align: center;
   }
@@ -90,9 +100,25 @@ const StyledNavbar = styled.div`
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true); // Aktifkan shadow saat scroll turun
+      } else {
+        setIsScrolled(false); // Hilangkan shadow jika kembali ke atas
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
   return (
-    <StyledNavbar>
+    <StyledNavbar isScrolled={isScrolled}>
       <nav>
         <div id="brand">
           <img src={logo} alt="Logo Masjid" />
@@ -104,17 +130,39 @@ export default function Navbar() {
         </button>
 
         <div className={`dropdown-menu ${menuOpen ? "show" : ""}`}>
-          <a href="#">Home</a>
-          <a href="#">Information</a>
-          <a href="#">About</a>
-          <button>Login</button>
+          <Link to="home" smooth={true} duration={500} className="listlink">
+            Home
+          </Link>
+          <Link
+            to="information"
+            smooth={true}
+            duration={500}
+            className="listlink"
+          >
+            Information
+          </Link>
+          <Link to="about" smooth={true} duration={500} className="listlink">
+            About
+          </Link>
+          <button onClick={() => navigate("/login")}>Login</button>
         </div>
 
         <div className="listnav">
-          <a href="#">Home</a>
-          <a href="#">Information</a>
-          <a href="#">About</a>
-          <button>Login</button>
+          <Link to="home" smooth={true} duration={500} className="listlink">
+            Home
+          </Link>
+          <Link
+            to="information"
+            smooth={true}
+            duration={500}
+            className="listlink"
+          >
+            Information
+          </Link>
+          <Link to="about" smooth={true} duration={500} className="listlink">
+            About
+          </Link>
+          <button onClick={() => navigate("/login")}>Login</button>
         </div>
       </nav>
     </StyledNavbar>

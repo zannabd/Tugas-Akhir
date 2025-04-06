@@ -28,6 +28,7 @@ const StyledHero = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: center;
+  padding-top: 70px;
 
   /* Warna hijau di atas hero */
   .top-section {
@@ -137,7 +138,7 @@ export default function Hero() {
   return (
     <StyledHero>
       <div className="top-section"></div> {/* Efek hijau di atas */}
-      <div className="container">
+      <div className="container" id="home">
         <div className="left">
           <img src={masjid} alt="Ilustrasi Masjid" />
         </div>

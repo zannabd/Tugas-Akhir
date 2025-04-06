@@ -17,7 +17,9 @@ export default function About() {
   return (
     <StyledAbout>
       <>
-        <h1 className="judul">About</h1>
+        <h1 className="judul" id="about">
+          About
+        </h1>
         <p>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis
           libero obcaecati deserunt, cum in praesentium quas sapiente nostrum

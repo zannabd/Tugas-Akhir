@@ -37,6 +37,22 @@ const StyledAddress = styled.div`
     height: 30px;
     margin-right: 5px;
   }
+    @media (min-width: 768px) {
+    padding: 1.5rem;
+    .brand {
+      margin-bottom: 3rem;
+    }
+  @media (min-width: 1024px) {
+    padding: 2rem;
+    .brand {
+      margin-bottom: 5rem;
+    }
+    .socmed,
+    .kontak,
+    .tentang {
+      margin-top: 9.5rem;
+    }
+  }
 `;
 export default function Address() {
   return (
