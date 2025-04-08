@@ -17,7 +17,7 @@ const StyledForm = styled.div`
     border: none;
   }
   button img {
-    max-width: 40px;
+    max-width: 30px;
   }
   h1 {
     color: #ffffff;

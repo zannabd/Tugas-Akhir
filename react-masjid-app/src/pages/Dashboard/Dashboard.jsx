@@ -111,12 +111,6 @@ const StyledDashboard = styled.div`
     pointer-events: auto;
     border-radius: 50%;
   }
-
-  .button button:hover {
-    background-color: rgba(142, 137, 137, 0.2);
-    border-radius: 50%;
-  }
-
   .button img {
     width: 35px;
   }

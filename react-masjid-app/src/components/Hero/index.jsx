@@ -29,6 +29,7 @@ const StyledHero = styled.div`
   align-items: center;
   text-align: center;
   padding-top: 70px;
+  background-color: #f8f5e4;
 
   /* Warna hijau di atas hero */
   .top-section {

@@ -7,12 +7,14 @@ import styled from "styled-components";
 
 const StyledInformation = styled.div`
   background-color: #f8f5e4;
+  margin: 0;
   .card-information {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     margin: 5rem 0rem;
     gap: 1rem;
+    padding-bottom: 2rem;
   }
   .card-img {
     width: 100%;
@@ -35,7 +37,12 @@ export default function Information() {
   return (
     <StyledInformation>
       <>
-        <h1 className="text-center mt-3 mb-3" id="information">Informasi</h1>
+        <h1 className="text-center" id="information">
+          Informasi
+        </h1>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <div style={{ borderTop: "2px solid black", width: "50%" }}></div>
+        </div>
         <div className="card-information">
           <Card style={{ width: "18rem" }} className="card-container">
             <Card.Img variant="top" src={kegiatan} className="card-img" />
