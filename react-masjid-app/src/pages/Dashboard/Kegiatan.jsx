@@ -1,9 +1,11 @@
 import styled from "styled-components";
 import Edit from "../../images/icons8-edit-48.png";
 import Delete from "../../images/icons8-delete-48.png";
-import add from "../../images/icons8-add-50.png";
+// import add from "../../images/icons8-add-50.png";
 import search from "../../images/icons8-search-50.png";
 import { useState } from "react";
+import AddButton from "../../components/Button/addButton";
+import ResetFilter from "../../components/Button/resetFilter";
 
 const StyledKegiatan = styled.div`
   margin: 10px;
@@ -70,21 +72,6 @@ const StyledKegiatan = styled.div`
     height: 25px;
     pointer-events: none;
   }
-  .dropdown .add {
-    background-color: #4c934c;
-    color: #fff;
-    border: none;
-    display: flex;
-    align-items: center;
-    padding: 0px 5px;
-
-    &:hover {
-      background-color: #306c3c;
-    }
-  }
-  .dropdown .add img {
-    margin-left: 5px;
-  }
   .tabel {
     border: 1px solid grey;
     border-radius: 12px;
@@ -94,16 +81,6 @@ const StyledKegiatan = styled.div`
     overflow-x: auto;
     width: 100%;
     -webkit-overflow-scrolling: touch;
-  }
-  .table::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    width: 20px;
-    background: linear-gradient(to left, #fff, transparent);
-    pointer-events: none;
   }
   table {
     min-width: 600px;
@@ -125,6 +102,7 @@ const StyledKegiatan = styled.div`
   }
   .action {
     display: flex;
+    justify-content: end;
   }
   .action button {
     border: none;
@@ -280,29 +258,54 @@ export default function Kegiatan() {
     },
   ];
 
+  const [statusFilter, setStatusFilter] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
+  // Filter berdasar search + status
+  const filteredData = kegiatanList.filter((item) => {
+    const keywordMatch = item.nama
+      .toLowerCase()
+      .includes(searchKeyword.toLowerCase());
+    const statusMatch = statusFilter ? item.status === statusFilter : true;
+    return keywordMatch && statusMatch;
+  });
+
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = kegiatanList.slice(indexOfFirstRow, indexOfLastRow);
+  const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
 
-  const totalPages = Math.ceil(kegiatanList.length / rowsPerPage);
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
+  const handleReset = () => {
+    setSearchKeyword("");
+    setStatusFilter("");
+  };
   return (
     <StyledKegiatan>
       <>
         <div className="desc">
-          <h4>{kegiatanList.length} Total Kegiatan</h4>
+          <h4>{filteredData.length} Total Kegiatan</h4>
           <div className="filtered">
             <div className="search-container">
-              <input type="text" />
+              <input
+                type="text"
+                placeholder="Cari Kegiatan..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+              />
               <button className="search">
                 <img src={search} alt="" />
               </button>
             </div>
             <div className="dropdown">
-              <select name="" id="">
+              <select
+                name=""
+                id=""
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
                 <option value="" disabled selected>
                   Status
                 </option>
@@ -311,11 +314,8 @@ export default function Kegiatan() {
                 <option value="Dibatalkan">Dibatalkan</option>
               </select>
             </div>
-            <div className="dropdown">
-              <button className="add">
-                Tambah Kegiatan <img src={add} alt="" />
-              </button>
-            </div>
+            <ResetFilter onReset={handleReset} />
+            <AddButton />
           </div>
         </div>
         <div className="tabel">
