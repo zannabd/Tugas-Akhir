@@ -11,6 +11,10 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import Kegiatan from "./pages/Dashboard/Kegiatan";
 import Keuangan from "./pages/Dashboard/Keuangan";
 import Dokumentasi from "./pages/Dashboard/Dokumentasi";
+import KegiatanPublic from "./pages/General/KegiatanPublic";
+import PublicLayout from "./components/Layout/PublicLayout";
+import KeuanganPublic from "./pages/General/KeuanganPublic";
+import DokumentasiPublic from "./pages/General/DokumentasiPublic";
 function App() {
   return (
     <>
@@ -47,6 +51,30 @@ function App() {
             <Layout>
               <Dokumentasi />
             </Layout>
+          }
+        />
+        <Route
+          path="/kegiatan-public"
+          element={
+            <PublicLayout>
+              <KegiatanPublic />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/keuangan-public"
+          element={
+            <PublicLayout>
+              <KeuanganPublic />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/galeri-public"
+          element={
+            <PublicLayout>
+              <DokumentasiPublic />
+            </PublicLayout>
           }
         />
       </Routes>

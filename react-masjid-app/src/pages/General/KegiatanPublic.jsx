@@ -6,9 +6,11 @@ import search from "../../images/icons8-search-50.png";
 import { useState } from "react";
 import AddButton from "../../components/Button/addButton";
 import ResetFilter from "../../components/Button/resetFilter";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 
 const StyledKegiatan = styled.div`
-  margin: 10px;
+  margin: 5.3rem 10px;
   .desc {
     border: 1px solid grey;
     padding: 16px;
@@ -126,16 +128,17 @@ const StyledKegiatan = styled.div`
     }
   }
   @media (min-width: 1024px) {
+    margin: 5.5rem 1rem;
     max-width: 100%;
     .desc {
-      width: 1055px;
+      width: 1250px;
     }
     table {
       width: 100%;
     }
   }
 `;
-export default function Kegiatan() {
+export default function KegiatanPublic() {
   const kegiatanList = [
     {
       id: 1,
@@ -315,7 +318,6 @@ export default function Kegiatan() {
               </select>
             </div>
             <ResetFilter onReset={handleReset} />
-            <AddButton label="Tambah Kegiatan" />
           </div>
         </div>
         <div className="tabel">
@@ -327,7 +329,6 @@ export default function Kegiatan() {
                 <th>Tanggal</th>
                 <th>Lokasi</th>
                 <th>Status</th>
-                <th>Tindakan</th>
               </tr>
             </thead>
             <tbody>
@@ -354,16 +355,6 @@ export default function Kegiatan() {
                       }}
                     >
                       {item.status}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="action">
-                      <button>
-                        <img src={Edit} alt="" />
-                      </button>
-                      <button>
-                        <img src={Delete} alt="" />
-                      </button>
                     </div>
                   </td>
                 </tr>

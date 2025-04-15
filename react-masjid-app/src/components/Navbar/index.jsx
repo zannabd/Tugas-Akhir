@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import styled from "styled-components";
 import logo from "../../assets/Al-Ihsan.png";
 import { Link } from "react-scroll";
@@ -130,36 +130,36 @@ export default function Navbar() {
         </button>
 
         <div className={`dropdown-menu ${menuOpen ? "show" : ""}`}>
-          <Link to="home" smooth={true} duration={500} className="listlink">
+          <NavLink to="/" smooth={true} duration={300} className="listlink">
             Home
-          </Link>
+          </NavLink>
           <Link
             to="information"
             smooth={true}
-            duration={500}
+            duration={300}
             className="listlink"
           >
             Information
           </Link>
-          <Link to="about" smooth={true} duration={500} className="listlink">
+          <Link to="about" smooth={true} duration={300} className="listlink">
             About
           </Link>
           <button onClick={() => navigate("/login")}>Login</button>
         </div>
 
         <div className="listnav">
-          <Link to="home" smooth={true} duration={500} className="listlink">
+          <NavLink to="/" smooth={true} duration={300} className="listlink">
             Home
-          </Link>
+          </NavLink>
           <Link
             to="information"
             smooth={true}
-            duration={500}
+            duration={300}
             className="listlink"
           >
             Information
           </Link>
-          <Link to="about" smooth={true} duration={500} className="listlink">
+          <Link to="about" smooth={true} duration={300} className="listlink">
             About
           </Link>
           <button onClick={() => navigate("/login")}>Login</button>

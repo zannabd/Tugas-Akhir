@@ -6,7 +6,7 @@ import AddButton from "../../components/Button/addButton";
 import ResetFilter from "../../components/Button/resetFilter";
 
 const StyledKeuangan = styled.div`
-  margin: 10px;
+  margin: 5.3rem 10px;
   .desc {
     border: 1px solid grey;
     padding: 16px;
@@ -127,7 +127,7 @@ const dataKeuangan = [
     balance: "Rp55.000.000",
   },
 ];
-export default function Keuangan() {
+export default function KeuanganPublic() {
   const [bulanDipilih, setBulanDipilih] = useState("");
   const [tahunDipilih, setTahunDipilih] = useState("");
 
@@ -192,7 +192,6 @@ export default function Keuangan() {
               ))}
             </select>
             <ResetFilter onReset={handleReset} />
-            <AddButton label="Buat Laporan" />
           </div>
         </div>
         <div className="tabel">
@@ -205,7 +204,6 @@ export default function Keuangan() {
                 <th>Pendapatan</th>
                 <th>Pengeluahan</th>
                 <th>Saldo Total</th>
-                <th>Tindakan</th>
               </tr>
             </thead>
             <tbody>
@@ -217,16 +215,6 @@ export default function Keuangan() {
                   <td>{item.pendapatan}</td>
                   <td>{item.pengeluaran}</td>
                   <td>{item.balance}</td>
-                  <td>
-                    <div className="action">
-                      <button>
-                        <img src={Edit} alt="" />
-                      </button>
-                      <button>
-                        <img src={Delete} alt="" />
-                      </button>
-                    </div>
-                  </td>
                 </tr>
               ))}
             </tbody>

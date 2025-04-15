@@ -4,6 +4,7 @@ import kegiatan from "../../images/kegiatan.png";
 import keuangan from "../../images/laporan-keuangan.jpg";
 import gallery from "../../images/dokumentasi.png";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 const StyledInformation = styled.div`
   background-color: #f8f5e4;
@@ -34,6 +35,7 @@ const StyledInformation = styled.div`
   }
 `;
 export default function Information() {
+  const navigate = useNavigate();
   return (
     <StyledInformation>
       <>
@@ -51,7 +53,12 @@ export default function Information() {
               <Card.Text>
                 Seluruh informasi kegiatan masjid terdapat disini
               </Card.Text>
-              <Button variant="warning">Go somewhere</Button>
+              <Button
+                variant="warning"
+                onClick={() => navigate("/kegiatan-public")}
+              >
+                Selengkapnya
+              </Button>
             </Card.Body>
           </Card>
           <Card style={{ width: "18rem" }} className="card-container">
@@ -61,7 +68,7 @@ export default function Information() {
               <Card.Text>
                 Informasi mengenai laporan keuangan ada disini
               </Card.Text>
-              <Button variant="warning">Go somewhere</Button>
+              <Button variant="warning" onClick={() => navigate("/keuangan-public")}>Selengkapnya</Button>
             </Card.Body>
           </Card>
           <Card style={{ width: "18rem" }} className="card-container">
@@ -71,7 +78,7 @@ export default function Information() {
               <Card.Text>
                 Dokumentasi foto kegiatan yang dilakukan ada disini.
               </Card.Text>
-              <Button variant="warning">Go somewhere</Button>
+              <Button variant="warning"  onClick={() => navigate("/galeri-public")}>Selengkapnya</Button>
             </Card.Body>
           </Card>
         </div>

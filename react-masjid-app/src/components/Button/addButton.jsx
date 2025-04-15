@@ -21,14 +21,18 @@ const StyledAdd = styled.div`
   .add-container .add img {
     margin-left: 5px;
   }
+  img {
+    width: 30px;
+  }
 `;
-export default function AddButton() {
+export default function AddButton({ label = "Data" }) {
   return (
     <StyledAdd>
       <>
         <div className="add-container">
           <button className="add">
-            Tambah Kegiatan <img src={add} alt="" />
+           {label}
+            <img src={add} alt="" />
           </button>
         </div>
       </>

@@ -1,9 +1,8 @@
 import React from "react";
 import styled from "styled-components";
-import AddButton from "../../components/Button/addButton";
 
 const StyledDokumentasi = styled.div`
-  margin: 10px;
+  margin: 5.3rem 10px;
   .desc {
     border: 1px solid grey;
     padding: 16px;
@@ -67,13 +66,12 @@ const images = [
   // Tambahkan lebih banyak gambar jika perlu
 ];
 
-export default function Dokumentasi() {
+export default function DokumentasiPublic() {
   return (
     <StyledDokumentasi>
       <div className="galeri-wrapper">
         <div className="desc">
           <h3 className="judul">{images.length} Total Galeri Kegiatan</h3>
-          <AddButton label="Upload Dokumentasi" />
         </div>
         <div className="galeri-container">
           <div className="galeri">
