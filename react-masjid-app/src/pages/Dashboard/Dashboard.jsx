@@ -6,6 +6,7 @@ import left from "../../images/left-arrow.png";
 import right from "../../images/right-arrow.png";
 import styled from "styled-components";
 import { useRef } from "react";
+import EditButton from "../../components/Button/editButton";
 
 const StyledDashboard = styled.div`
   /* CSS untuk Statistik Card */
@@ -18,8 +19,12 @@ const StyledDashboard = styled.div`
     padding: 16px;
     margin: 10px;
     border: 1px solid grey;
+    justify-content: space-between; 
   }
-
+  .stat-info {
+    display: flex;
+align-self: center;
+  }
   .stat-icon {
     width: 35px;
     height: 35px;
@@ -154,27 +159,45 @@ export default function Dashboard() {
     <StyledDashboard>
       <>
         <div className="card1">
-          <div class="stat-card">
-            <img class="stat-icon" src={calendar}></img>
-            <div class="stat-content">
-              <h4>Total Kegiatan</h4>
-              <p class="stat-value">12 Kegiatan</p>
-              {/* <p class="stat-subtitle">+2 minggu ini</p> */}
+          <div className="stat-card">
+            <div className="stat-info">
+              <img class="stat-icon" src={calendar}></img>
+              <div class="stat-content">
+                <h4>Total Kegiatan</h4>
+                <p class="stat-value">12 Kegiatan</p>
+                {/* <p class="stat-subtitle">+2 minggu ini</p> */}
+              </div>
+            </div>
+            <div className="edit-button">
+              <EditButton to={"/kegiatan"} />
             </div>
           </div>
           <div class="stat-card">
-            <img class="stat-icon" src={cash}></img>
-            <div class="stat-content">
-              <h4>Total Saldo</h4>
-              <p class="stat-value" src={cash}>
-                Rp.60.000.000
-              </p>
-              {/* <p class="stat-subtitle">+2 minggu ini</p> */}
+            <div className="stat-info">
+              <img class="stat-icon" src={cash}></img>
+              <div class="stat-content">
+                <h4>Total Saldo</h4>
+                <p class="stat-value" src={cash}>
+                  Rp.60.000.000
+                </p>
+                {/* <p class="stat-subtitle">+2 minggu ini</p> */}
+              </div>
+            </div>
+            <div className="edit-button">
+              <EditButton to={"/keuangan"} />
             </div>
           </div>
         </div>
         <div className="currentActivity">
-          <h3>Kegiatan Terbaru</h3>
+          <div
+            className="stat-info"
+            style={{ justifyContent: "space-between" }}
+          >
+            <h3>Kegiatan Terbaru</h3>
+            <div className="edit-button">
+              <EditButton to={"/kegiatan"} />
+            </div>
+          </div>
           <table>
             <thead>
               <tr>
@@ -195,7 +218,15 @@ export default function Dashboard() {
           </table>
         </div>
         <div className="dokumentasi">
-          <h3>Dokumentasi Kegiatan</h3>
+          <div
+            className="stat-info"
+            style={{ justifyContent: "space-between" }}
+          >
+            <h3>Dokumentasi Kegiatan</h3>
+            <div className="edit-button">
+              <EditButton to={"/dokumentasi"} />
+            </div>
+          </div>
           <div className="gallery" ref={geser}>
             {images.map((i) => (
               <div key={i} className="card-image">

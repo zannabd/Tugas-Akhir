@@ -8,6 +8,7 @@ import AddButton from "../../components/Button/addButton";
 import ResetFilter from "../../components/Button/resetFilter";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import Pagination from "../../components/Pagination";
 
 const StyledKegiatan = styled.div`
   margin: 5.3rem 10px;
@@ -113,15 +114,7 @@ const StyledKegiatan = styled.div`
   img {
     width: 30px;
   }
-  .pagination {
-    display: flex;
-    justify-content: center;
-  }
-  .pagination .handle-pagination {
-    border: none;
-    background-color: #4c934c;
-    color: white;
-  }
+
   @media (min-width: 768px) {
     table {
       width: 100%;
@@ -363,43 +356,11 @@ export default function KegiatanPublic() {
           </table>
         </div>
         {/* Pagination */}
-        <div
-          style={{ marginTop: "12px", display: "flex", gap: "8px" }}
-          className="pagination"
-        >
-          <button
-            className="handle-pagination"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Prev
-          </button>
-
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              style={{
-                fontWeight: currentPage === i + 1 ? "bold" : "normal",
-                border: "none",
-                color: "#4c934c",
-                backgroundColor: "#ffffff",
-              }}
-            >
-              {i + 1}
-            </button>
-          ))}
-
-          <button
-            className="handle-pagination"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </>
     </StyledKegiatan>
   );

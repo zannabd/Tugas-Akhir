@@ -4,6 +4,7 @@ import Edit from "../../images/icons8-edit-48.png";
 import Delete from "../../images/icons8-delete-48.png";
 import AddButton from "../../components/Button/addButton";
 import ResetFilter from "../../components/Button/resetFilter";
+import Pagination from "../../components/Pagination";
 
 const StyledKeuangan = styled.div`
   margin: 5.3rem 10px;
@@ -130,6 +131,8 @@ const dataKeuangan = [
 export default function KeuanganPublic() {
   const [bulanDipilih, setBulanDipilih] = useState("");
   const [tahunDipilih, setTahunDipilih] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
 
   // Ambil semua tahun unik dari data
   const tahunUnik = [
@@ -147,6 +150,9 @@ export default function KeuanganPublic() {
 
     return cocokBulan && cocokTahun;
   });
+
+  const totalPages = Math.ceil(filterData.length / rowsPerPage);
+
   const handleReset = () => {
     setBulanDipilih("");
     setTahunDipilih("");
@@ -156,7 +162,7 @@ export default function KeuanganPublic() {
     <StyledKeuangan>
       <>
         <div className="desc">
-          <h4>{dataKeuangan.length} Total Laporan</h4>
+          <h4>{dataKeuangan.length} Total Laporan Keuangan</h4>
           <div className="filtered">
             <select
               id="bulan"
@@ -220,6 +226,11 @@ export default function KeuanganPublic() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </>
     </StyledKeuangan>
   );

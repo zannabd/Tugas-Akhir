@@ -45,7 +45,7 @@ const StyledHero = styled.div`
     justify-content: center;
     background-color: #f8f5e4;
     padding: 2rem;
-    margin-top: 5rem;
+    margin-top: 6rem;
     gap: 1.5rem;
   }
 

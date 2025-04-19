@@ -120,10 +120,12 @@ export default function Navbar() {
   return (
     <StyledNavbar isScrolled={isScrolled}>
       <nav>
-        <div id="brand">
-          <img src={logo} alt="Logo Masjid" />
-          <h1 className="text-white">Masjid Al Ihsan</h1>
-        </div>
+        <NavLink to="/" style={{ textDecoration: "none" }}>
+          <div id="brand">
+            <img src={logo} alt="Logo Masjid" />
+            <h1 className="text-white">Masjid Al Ihsan</h1>
+          </div>
+        </NavLink>
 
         <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
           ☰

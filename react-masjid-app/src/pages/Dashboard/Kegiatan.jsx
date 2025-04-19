@@ -6,6 +6,8 @@ import search from "../../images/icons8-search-50.png";
 import { useState } from "react";
 import AddButton from "../../components/Button/addButton";
 import ResetFilter from "../../components/Button/resetFilter";
+import Pagination from "../../components/Pagination";
+import { useNavigate } from "react-router-dom";
 
 const StyledKegiatan = styled.div`
   margin: 10px;
@@ -110,15 +112,6 @@ const StyledKegiatan = styled.div`
   }
   img {
     width: 30px;
-  }
-  .pagination {
-    display: flex;
-    justify-content: center;
-  }
-  .pagination .handle-pagination {
-    border: none;
-    background-color: #4c934c;
-    color: white;
   }
   @media (min-width: 768px) {
     table {
@@ -257,7 +250,7 @@ export default function Kegiatan() {
       status: "Mendatang",
     },
   ];
-
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -315,7 +308,10 @@ export default function Kegiatan() {
               </select>
             </div>
             <ResetFilter onReset={handleReset} />
-            <AddButton label="Tambah Kegiatan" />
+            <AddButton
+              label="Tambah Kegiatan"
+              onClick={() => navigate("/tambah-kegiatan")}
+            />
           </div>
         </div>
         <div className="tabel">
@@ -372,43 +368,11 @@ export default function Kegiatan() {
           </table>
         </div>
         {/* Pagination */}
-        <div
-          style={{ marginTop: "12px", display: "flex", gap: "8px" }}
-          className="pagination"
-        >
-          <button
-            className="handle-pagination"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Prev
-          </button>
-
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              style={{
-                fontWeight: currentPage === i + 1 ? "bold" : "normal",
-                border: "none",
-                color: "#4c934c",
-                backgroundColor: "#ffffff",
-              }}
-            >
-              {i + 1}
-            </button>
-          ))}
-
-          <button
-            className="handle-pagination"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </>
     </StyledKegiatan>
   );

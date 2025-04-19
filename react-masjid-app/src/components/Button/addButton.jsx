@@ -25,13 +25,13 @@ const StyledAdd = styled.div`
     width: 30px;
   }
 `;
-export default function AddButton({ label = "Data" }) {
+export default function AddButton({ label = "Data", onClick }) {
   return (
     <StyledAdd>
       <>
         <div className="add-container">
-          <button className="add">
-           {label}
+          <button onClick={onClick} className="add">
+            {label}
             <img src={add} alt="" />
           </button>
         </div>

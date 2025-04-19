@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { useEffect, useState } from "react";
 
 const StyledPrayerWidget = styled.div`
   position: absolute;
@@ -49,25 +50,69 @@ const StyledPrayerWidget = styled.div`
   }
 
   @media (min-width: 1024px) {
-      width: 50%;
+    width: 50%;
   }
 `;
 
 export default function PrayerWidget() {
+  const [prayerTimes, setPrayerTimes] = useState({});
+  const [locationError, setLocationError] = useState("");
+
+  useEffect(() => {
+    const fetchPrayerTimes = async (lat, lon) => {
+      try {
+        const res = await fetch(
+          `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=99&methodSettings=19.5,0.3,18.7,0.1,0.1`
+        );
+        const data = await res.json();
+        setPrayerTimes(data.data.timings);
+      } catch (err) {
+        console.error("Gagal fetch jadwal:", err);
+        setLocationError("Gagal memuat jadwal sholat.");
+      }
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          fetchPrayerTimes(latitude, longitude);
+        },
+        (err) => {
+          console.warn("Lokasi ditolak:", err.message);
+          setLocationError("Gunakan lokasi default: Jakarta");
+          fetchPrayerTimes(-6.2, 106.8); // fallback Jakarta
+        }
+      );
+    } else {
+      setLocationError("Browser tidak mendukung lokasi.");
+    }
+  }, []);
+
+  const labels = {
+    Fajr: "Subuh",
+    Sunrise: "Syuruq",
+    Dhuhr: "Dzuhur",
+    Asr: "Ashar",
+    Maghrib: "Maghrib",
+    Isha: "Isya",
+  };
+
   return (
     <StyledPrayerWidget>
       <div className="judul">
         <h5>Jadwal Sholat</h5>
+        {locationError && (
+          <p style={{ fontSize: "0.9rem", color: "red" }}>{locationError}</p>
+        )}
       </div>
       <div className="container">
-        {["Subuh", "Syuruq", "Dzuhur", "Ashar", "Maghrib", "Isya"].map(
-          (prayer) => (
-            <div className="contain" key={prayer}>
-              <h6>{prayer}</h6>
-              <h4>04.41</h4>
-            </div>
-          )
-        )}
+        {Object.entries(labels).map(([key, label]) => (
+          <div className="contain" key={key}>
+            <h6>{label}</h6>
+            <h4>{prayerTimes[key] || "--:--"}</h4>
+          </div>
+        ))}
       </div>
     </StyledPrayerWidget>
   );

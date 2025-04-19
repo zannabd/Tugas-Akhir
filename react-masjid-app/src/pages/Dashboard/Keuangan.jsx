@@ -4,6 +4,8 @@ import Edit from "../../images/icons8-edit-48.png";
 import Delete from "../../images/icons8-delete-48.png";
 import AddButton from "../../components/Button/addButton";
 import ResetFilter from "../../components/Button/resetFilter";
+import Pagination from "../../components/Pagination";
+import { useNavigate } from "react-router-dom";
 
 const StyledKeuangan = styled.div`
   margin: 10px;
@@ -128,8 +130,11 @@ const dataKeuangan = [
   },
 ];
 export default function Keuangan() {
+  const navigate = useNavigate();
   const [bulanDipilih, setBulanDipilih] = useState("");
   const [tahunDipilih, setTahunDipilih] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
 
   // Ambil semua tahun unik dari data
   const tahunUnik = [
@@ -147,6 +152,9 @@ export default function Keuangan() {
 
     return cocokBulan && cocokTahun;
   });
+
+  const totalPages = Math.ceil(filterData.length / rowsPerPage);
+
   const handleReset = () => {
     setBulanDipilih("");
     setTahunDipilih("");
@@ -192,7 +200,10 @@ export default function Keuangan() {
               ))}
             </select>
             <ResetFilter onReset={handleReset} />
-            <AddButton label="Buat Laporan" />
+            <AddButton
+              label="Buat Laporan"
+              onClick={() => navigate("/buat-laporan")}
+            />
           </div>
         </div>
         <div className="tabel">
@@ -232,6 +243,11 @@ export default function Keuangan() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </>
     </StyledKeuangan>
   );

@@ -15,6 +15,9 @@ import KegiatanPublic from "./pages/General/KegiatanPublic";
 import PublicLayout from "./components/Layout/PublicLayout";
 import KeuanganPublic from "./pages/General/KeuanganPublic";
 import DokumentasiPublic from "./pages/General/DokumentasiPublic";
+import AddFormKegiatan from "./components/FormAddEdit/addFormKegiatan";
+import AddFormKeuangan from "./components/FormAddEdit/addFormKeuangan";
+import AddFormDokumentasi from "./components/FormAddEdit/addFormDokumentasi";
 function App() {
   return (
     <>
@@ -77,6 +80,9 @@ function App() {
             </PublicLayout>
           }
         />
+        <Route path="/tambah-kegiatan" element={<AddFormKegiatan />} />
+        <Route path="/buat-laporan" element={<AddFormKeuangan />} />
+        <Route path="/upload-dokumentasi" element={<AddFormDokumentasi />} />
       </Routes>
     </>
   );

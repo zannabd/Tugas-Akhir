@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
+import search from "../../images/icons8-search-50.png";
+import Pagination from "../../components/Pagination";
 
 const StyledDokumentasi = styled.div`
   margin: 5.3rem 10px;
@@ -17,6 +19,34 @@ const StyledDokumentasi = styled.div`
   .judul {
     color: #4c934c;
     font-weight: 700;
+  }
+  .search-container .search {
+    background-color: #ffffff;
+    border: none;
+  }
+  .search-container {
+    position: relative;
+  }
+  .search-container input {
+    border: 1.5px solid #4c934c;
+    height: 30px;
+    border-radius: 20px;
+    outline: none;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      border-color: #4c934c;
+      box-shadow: 0 0 0 2px rgba(83, 165, 72, 0.2);
+    }
+  }
+  .search img {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 25px;
+    height: 25px;
+    pointer-events: none;
   }
   .galeri-container {
     margin-top: 1rem;
@@ -61,33 +91,71 @@ const images = [
     id: 3,
     src: "https://picsum.photos/300/200?random=3",
     kegiatan: "Buka Puasa Bersama",
-    keterangan: "30 Maret 2025",
+    keterangan: "Kumpulan warga van gogh",
   },
   // Tambahkan lebih banyak gambar jika perlu
 ];
 
 export default function DokumentasiPublic() {
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 16;
+
+  const filteredImages = images.filter(
+    (item) =>
+      item.kegiatan.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+      item.keterangan.toLowerCase().includes(searchKeyword.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredImages.length / rowsPerPage);
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentImages = filteredImages.slice(indexOfFirstRow, indexOfLastRow);
+
   return (
     <StyledDokumentasi>
       <div className="galeri-wrapper">
         <div className="desc">
-          <h3 className="judul">{images.length} Total Galeri Kegiatan</h3>
+          <h3 className="judul">{filteredImages.length} Total Dokumentasi Kegiatan</h3>
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Cari..."
+              value={searchKeyword}
+              onChange={(e) => {
+                setSearchKeyword(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+            <button className="search">
+              <img src={search} alt="" />
+            </button>
+          </div>
         </div>
         <div className="galeri-container">
           <div className="galeri">
-            {images.map((item) => (
-              <div key={item.id} className="galeri-item">
-                <img src={item.src} alt={`Dokumentasi ${item.kegiatan}`} />
-                <div className="caption">
-                  <p>
-                    <strong>{item.kegiatan}</strong>
-                  </p>
-                  <p>{item.keterangan}</p>
+            {currentImages.length > 0 ? (
+              currentImages.map((item) => (
+                <div key={item.id} className="galeri-item">
+                  <img src={item.src} alt={`Dokumentasi ${item.kegiatan}`} />
+                  <div className="caption">
+                    <p>
+                      <strong>{item.kegiatan}</strong>
+                    </p>
+                    <p>{item.keterangan}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p style={{ padding: "1rem" }}>Tidak ada hasil ditemukan.</p>
+            )}
           </div>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
     </StyledDokumentasi>
   );
