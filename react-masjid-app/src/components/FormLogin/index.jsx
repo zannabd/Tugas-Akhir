@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import left from "../../images/left-white.png";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const StyledForm = styled.div`
   background: linear-gradient(to bottom, #19381f, #53a548, #4c934c);
@@ -81,8 +82,30 @@ const StyledForm = styled.div`
     }
   }
 `;
+const users = [{ email: "admin@gmail.com", password: "12345" }];
 export default function FormLogin() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    const userFound = users.find(
+      (user) => user.email === email && user.password === password
+    );
+    if (userFound) {
+      setAlertMessage("Login berhasil!");
+      setAlertType("success");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000); // kasih delay biar alert sempat tampil
+    } else {
+      setAlertMessage("Email atau password salah");
+      setAlertType("danger");
+    }
+  };
   return (
     <StyledForm>
       <>
@@ -91,20 +114,36 @@ export default function FormLogin() {
         </button>
         <h1 className="text-center mb-3">Login</h1>
         <div className="main">
-          <form>
+          <form onSubmit={handleLogin}>
+            {alertMessage && (
+              <div
+                className={`alert alert-${alertType} text-center`}
+                role="alert"
+                style={{
+                  borderTopRightRadius: "20px",
+                  borderTopLeftRadius: "20px",
+                  borderBottomRightRadius: "0",
+                  borderBottomLeftRadius: "0",
+                }}
+              >
+                {alertMessage}
+              </div>
+            )}
             <input
-              type="text"
-              name="uname"
-              placeholder="Username"
-              required=""
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
             <input
               type="password"
-              name="pass"
               placeholder="Password"
-              required=""
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
-            <button onClick={() => navigate("/dashboard")} className="login">
+            <button type="submit" className="login">
               Login
             </button>
           </form>

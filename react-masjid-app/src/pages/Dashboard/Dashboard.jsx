@@ -29,6 +29,8 @@ align-self: center;
     width: 35px;
     height: 35px;
     margin-right: 16px;
+    display: flex;
+    align-self: center;
   }
 
   .stat-content h4 {

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import left from "../../images/left-white.png";
 import { useState } from "react";
 import styled from "styled-components";
@@ -118,19 +118,31 @@ const StyledForm = styled.div`
 
 export default function AddFormKeuangan({ onCreate }) {
   const navigate = useNavigate();
-  const [detail, setDetail] = useState(null); // Menyimpan file yang di-upload
-  const [tanggal, setTanggal] = useState("");
-  const [pendapatan, setPendapatan] = useState("");
-  const [pengeluaran, setPengeluaran] = useState("");
+  const location = useLocation();
+  const keuanganToEdit = location.state?.keuangan;
+  console.log(keuanganToEdit);
+  const [detail, setDetail] = useState(
+    keuanganToEdit ? { name: keuanganToEdit.detail } : null
+  );
+  const [tanggal, setTanggal] = useState(keuanganToEdit?.tanggal || "");
+  const [pendapatan, setPendapatan] = useState(
+    keuanganToEdit?.pendapatan || ""
+  );
+  const [pengeluaran, setPengeluaran] = useState(
+    keuanganToEdit?.pengeluaran || ""
+  );
   const [inputType, setInputType] = useState("text");
-  const [saldoTotal, setSaldoTotal] = useState("");
+  const [saldoTotal, setSaldoTotal] = useState(
+    keuanganToEdit?.saldoTotal || ""
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!detail || !tanggal) return;
+    if (!detail || !tanggal || !pendapatan || !pengeluaran || !saldoTotal)
+      return;
 
-    const newEntry = {
-      id: Date.now(),
+    const newKeuangan = {
+      id: keuanganToEdit?.id || Date.now(),
       detail: detail ? detail.name : "", // Jika file ada, ambil nama file
       tanggal,
       pendapatan,
@@ -138,14 +150,14 @@ export default function AddFormKeuangan({ onCreate }) {
       saldoTotal,
     };
 
-    onCreate(newEntry);
-
+    onCreate(newKeuangan);
     // Reset form
     setDetail(null);
     setTanggal("");
     setPendapatan("");
     setPengeluaran("");
     setSaldoTotal("");
+    navigate("/keuangan");
   };
 
   const onDrop = (acceptedFiles) => {

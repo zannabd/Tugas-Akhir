@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import left from "../../images/left-white.png";
 import { useState } from "react";
 import styled from "styled-components";
@@ -107,10 +107,12 @@ const StyledForm = styled.div`
 
 export default function AddFormKegiatan({ onCreate }) {
   const navigate = useNavigate();
-  const [nama, setNama] = useState("");
-  const [tanggal, setTanggal] = useState("");
-  const [lokasi, setLokasi] = useState("");
-  const [status, setStatus] = useState("");
+  const location = useLocation();
+  const kegiatanToEdit = location.state?.kegiatan;
+  const [nama, setNama] = useState(kegiatanToEdit?.nama || "");
+  const [tanggal, setTanggal] = useState(kegiatanToEdit?.tanggal || "");
+  const [lokasi, setLokasi] = useState(kegiatanToEdit?.lokasi || "");
+  const [status, setStatus] = useState(kegiatanToEdit?.status || "");
   const [inputType, setInputType] = useState("text");
 
   const handleSubmit = (e) => {
@@ -118,7 +120,7 @@ export default function AddFormKegiatan({ onCreate }) {
     if (!nama || !tanggal || !lokasi || !status) return;
 
     const newKegiatan = {
-      id: Date.now(), // sementara pakai timestamp
+      id: kegiatanToEdit?.id || Date.now(), // sementara pakai timestamp
       nama,
       tanggal,
       lokasi,
@@ -130,6 +132,7 @@ export default function AddFormKegiatan({ onCreate }) {
     setTanggal("");
     setLokasi("");
     setStatus("");
+    navigate("/kegiatan");
   };
   return (
     <StyledForm>
@@ -137,7 +140,9 @@ export default function AddFormKegiatan({ onCreate }) {
         <button onClick={() => navigate("/kegiatan")}>
           <img src={left} alt="" />
         </button>
-        <h1 className="text-center mt-5">Membuat Kegiatan</h1>
+        <h1 className="text-center mt-5">
+          {kegiatanToEdit ? "Edit Kegiatan" : "Membuat Kegiatan"}
+        </h1>
         <div className="main">
           <form onSubmit={handleSubmit}>
             <input

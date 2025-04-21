@@ -6,6 +6,7 @@ import hapus from "../../images/icons8-delete-48.png";
 import Pagination from "../../components/Pagination";
 import search from "../../images/icons8-search-50.png";
 import { useNavigate } from "react-router-dom";
+import ResetFilter from "../../components/Button/resetFilter";
 
 const StyledDokumentasi = styled.div`
   margin: 10px;
@@ -23,6 +24,11 @@ const StyledDokumentasi = styled.div`
   .judul {
     color: #4c934c;
     font-weight: 700;
+  }
+  .filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
   }
   .search-container .search {
     background-color: #ffffff;
@@ -88,6 +94,7 @@ const StyledDokumentasi = styled.div`
       transform: scale(1.1);
     }
   }
+
   @media (min-width: 768px) {
   }
   @media (min-width: 1024px) {
@@ -133,29 +140,36 @@ export default function Dokumentasi() {
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentImages = filteredImages.slice(indexOfFirstRow, indexOfLastRow);
 
+  const handleReset = () => {
+    setSearchKeyword("");
+  };
   return (
     <StyledDokumentasi>
       <div className="galeri-wrapper">
         <div className="desc">
           <h3 className="judul">{images.length} Total Galeri Kegiatan</h3>
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Cari..."
-              value={searchKeyword}
-              onChange={(e) => {
-                setSearchKeyword(e.target.value);
-                setCurrentPage(1);
-              }}
+          <div className="filter">
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Cari..."
+                value={searchKeyword}
+                onChange={(e) => {
+                  setSearchKeyword(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+              <button className="search">
+                <img src={search} alt="" />
+              </button>
+            </div>
+            <ResetFilter onReset={handleReset} />
+
+            <AddButton
+              label="Upload Dokumentasi"
+              onClick={() => navigate("/upload-dokumentasi")}
             />
-            <button className="search">
-              <img src={search} alt="" />
-            </button>
           </div>
-          <AddButton
-            label="Upload Dokumentasi"
-            onClick={() => navigate("/upload-dokumentasi")}
-          />
         </div>
         <div className="galeri-container">
           <div className="galeri">

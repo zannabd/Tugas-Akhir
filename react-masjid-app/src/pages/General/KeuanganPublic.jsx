@@ -86,7 +86,7 @@ const StyledKeuangan = styled.div`
   @media (min-width: 1024px) {
     max-width: 100%;
     .desc {
-      width: 1055px;
+      width: 1260px;
     }
     table {
       width: 100%;

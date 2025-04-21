@@ -8,6 +8,7 @@ import AddButton from "../../components/Button/addButton";
 import ResetFilter from "../../components/Button/resetFilter";
 import Pagination from "../../components/Pagination";
 import { useNavigate } from "react-router-dom";
+import Keuangan from "./Keuangan";
 
 const StyledKegiatan = styled.div`
   margin: 10px;
@@ -253,10 +254,11 @@ export default function Kegiatan() {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
-  // Filter berdasar search + status
+  // Filter search n status
   const filteredData = kegiatanList.filter((item) => {
     const keywordMatch = item.nama
       .toLowerCase()
@@ -265,16 +267,28 @@ export default function Kegiatan() {
     return keywordMatch && statusMatch;
   });
 
+  // Sort tanggal
+  const sortedKegiatan = [...filteredData].sort((a, b) => {
+    const dateA = new Date(a.tanggal);
+    const dateB = new Date(b.tanggal);
+    return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+  });
+
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredData.slice(indexOfFirstRow, indexOfLastRow);
+  const currentRows = sortedKegiatan.slice(indexOfFirstRow, indexOfLastRow);
 
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const totalPages = Math.ceil(sortedKegiatan.length / rowsPerPage);
 
   const handleReset = () => {
     setSearchKeyword("");
     setStatusFilter("");
   };
+
+  const handleSort = () => {
+    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+  };
+
   return (
     <StyledKegiatan>
       <>
@@ -320,7 +334,9 @@ export default function Kegiatan() {
               <tr>
                 <th>No.</th>
                 <th>Nama Kegiatan</th>
-                <th>Tanggal</th>
+                <th onClick={handleSort}>
+                  Tanggal {sortOrder === "asc" ? "↑" : "↓"}
+                </th>
                 <th>Lokasi</th>
                 <th>Status</th>
                 <th>Tindakan</th>
@@ -354,8 +370,14 @@ export default function Kegiatan() {
                   </td>
                   <td>
                     <div className="action">
-                      <button>
-                        <img src={Edit} alt="" />
+                      <button
+                        onClick={() =>
+                          navigate("/tambah-kegiatan", {
+                            state: { Keuangan: item },
+                          })
+                        }
+                      >
+                        <img src={Edit} alt="Edit" />
                       </button>
                       <button>
                         <img src={Delete} alt="" />

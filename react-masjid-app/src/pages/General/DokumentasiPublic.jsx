@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import search from "../../images/icons8-search-50.png";
 import Pagination from "../../components/Pagination";
+import ResetFilter from "../../components/Button/resetFilter";
 
 const StyledDokumentasi = styled.div`
   margin: 5.3rem 10px;
@@ -71,7 +72,7 @@ const StyledDokumentasi = styled.div`
   @media (min-width: 768px) {
   }
   @media (min-width: 1024px) {
-    width: 1060px;
+    width: 1260px;
   }
 `;
 const images = [
@@ -112,11 +113,16 @@ export default function DokumentasiPublic() {
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentImages = filteredImages.slice(indexOfFirstRow, indexOfLastRow);
 
+  const handleReset = () => {
+    setSearchKeyword("");
+  };
   return (
     <StyledDokumentasi>
       <div className="galeri-wrapper">
         <div className="desc">
-          <h3 className="judul">{filteredImages.length} Total Dokumentasi Kegiatan</h3>
+          <h3 className="judul">
+            {filteredImages.length} Total Dokumentasi Kegiatan
+          </h3>
           <div className="search-container">
             <input
               type="text"
@@ -131,6 +137,7 @@ export default function DokumentasiPublic() {
               <img src={search} alt="" />
             </button>
           </div>
+          <ResetFilter onReset={handleReset} />
         </div>
         <div className="galeri-container">
           <div className="galeri">

@@ -230,8 +230,14 @@ export default function Keuangan() {
                   <td>{item.balance}</td>
                   <td>
                     <div className="action">
-                      <button>
-                        <img src={Edit} alt="" />
+                      <button
+                        onClick={() =>
+                          navigate("/buat-laporan", {
+                            state: { keuangan: item },
+                          })
+                        }
+                      >
+                        <img src={Edit} alt="Edit" />
                       </button>
                       <button>
                         <img src={Delete} alt="" />
