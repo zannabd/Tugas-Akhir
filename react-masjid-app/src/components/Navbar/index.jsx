@@ -14,7 +14,7 @@ const StyledNavbar = styled.div`
   z-index: 999999;
   transition: all 0.3s ease-in-out;
   box-shadow: ${(props) =>
-    props.isScrolled ? "0px 4px 10px rgba(0, 0, 0, 0.3)" : "none"};
+    props.$isScrolled ? "0px 4px 10px rgba(0, 0, 0, 0.3)" : "none"};
   nav {
     display: flex;
     align-items: center;
@@ -118,7 +118,7 @@ export default function Navbar() {
     };
   }, []);
   return (
-    <StyledNavbar isScrolled={isScrolled}>
+    <StyledNavbar $isScrolled={isScrolled}>
       <nav>
         <NavLink to="/" style={{ textDecoration: "none" }}>
           <div id="brand">
@@ -132,36 +132,36 @@ export default function Navbar() {
         </button>
 
         <div className={`dropdown-menu ${menuOpen ? "show" : ""}`}>
-          <NavLink to="/" smooth={true} duration={300} className="listlink">
+          <NavLink to="/" smooth="true" duration={300} className="listlink">
             Home
           </NavLink>
           <Link
             to="information"
-            smooth={true}
+            smooth="true"
             duration={300}
             className="listlink"
           >
             Information
           </Link>
-          <Link to="about" smooth={true} duration={300} className="listlink">
+          <Link to="about" smooth="true" duration={300} className="listlink">
             About
           </Link>
           <button onClick={() => navigate("/login")}>Login</button>
         </div>
 
         <div className="listnav">
-          <NavLink to="/" smooth={true} duration={300} className="listlink">
+          <NavLink to="/" smooth="true" duration={300} className="listlink">
             Home
           </NavLink>
           <Link
             to="information"
-            smooth={true}
+            smooth="true"
             duration={300}
             className="listlink"
           >
             Information
           </Link>
-          <Link to="about" smooth={true} duration={300} className="listlink">
+          <Link to="about" smooth="true" duration={300} className="listlink">
             About
           </Link>
           <button onClick={() => navigate("/login")}>Login</button>

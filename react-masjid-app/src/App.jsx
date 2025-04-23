@@ -1,7 +1,7 @@
 // import { useState } from "react";
 // import reactLogo from "./assets/react.svg";
 // import viteLogo from "/vite.svg";
-import { Route, Router, Routes } from "react-router-dom";
+import { Navigate, Route, Router, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
@@ -18,7 +18,27 @@ import DokumentasiPublic from "./pages/General/DokumentasiPublic";
 import AddFormKegiatan from "./components/FormAddEdit/addFormKegiatan";
 import AddFormKeuangan from "./components/FormAddEdit/addFormKeuangan";
 import AddFormDokumentasi from "./components/FormAddEdit/addFormDokumentasi";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebase";
+
 function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const RequireAuth = ({ children }) => {
+    if (loading) return <div>Loading...</div>;
+    return currentUser ? children : <Navigate to="/login" />;
+  };
   return (
     <>
       <Routes>
@@ -27,33 +47,41 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <Layout>
-              <Dashboard />
-            </Layout>
+            <RequireAuth>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </RequireAuth>
           }
         />
         <Route
           path="/kegiatan"
           element={
-            <Layout>
-              <Kegiatan />
-            </Layout>
+            <RequireAuth>
+              <Layout>
+                <Kegiatan />
+              </Layout>
+            </RequireAuth>
           }
         />
         <Route
           path="/keuangan"
           element={
-            <Layout>
-              <Keuangan />
-            </Layout>
+            <RequireAuth>
+              <Layout>
+                <Keuangan />
+              </Layout>
+            </RequireAuth>
           }
         />
         <Route
           path="/dokumentasi"
           element={
-            <Layout>
-              <Dokumentasi />
-            </Layout>
+            <RequireAuth>
+              <Layout>
+                <Dokumentasi />
+              </Layout>
+            </RequireAuth>
           }
         />
         <Route
@@ -80,9 +108,23 @@ function App() {
             </PublicLayout>
           }
         />
-        <Route path="/tambah-kegiatan" element={<AddFormKegiatan />} />
-        <Route path="/buat-laporan" element={<AddFormKeuangan />} />
-        <Route path="/upload-dokumentasi" element={<AddFormDokumentasi />} />
+        <Route
+          path="/form-kegiatan"
+          element={
+            <RequireAuth>
+              <AddFormKegiatan />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/form-laporan"
+          element={
+            <RequireAuth>
+              <AddFormKeuangan />
+            </RequireAuth>
+          }
+        />
+        <Route path="/form-dokumentasi" element={<AddFormDokumentasi />} />
       </Routes>
     </>
   );

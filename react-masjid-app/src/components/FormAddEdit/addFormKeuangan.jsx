@@ -3,6 +3,8 @@ import left from "../../images/left-white.png";
 import { useState } from "react";
 import styled from "styled-components";
 import { useDropzone } from "react-dropzone";
+import { db } from "../../firebase"; // pastikan path ini sesuai
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 
 const StyledForm = styled.div`
   background: linear-gradient(to bottom, #19381f, #53a548, #4c934c);
@@ -26,16 +28,17 @@ const StyledForm = styled.div`
     font-weight: bold;
     transition: 0.5s ease-in-out;
     cursor: pointer;
+    margin-top: 1rem;
   }
   .main {
     background: #ffffff;
     position: absolute;
     width: 70%;
-    height: 70%;
+    height: 80%;
     display: flex;
     align-self: center;
     justify-content: center;
-    top: 25%;
+    top: 16%;
     border-radius: 20px;
     box-shadow: 0 40px 50px rgba(0, 0, 0, 0.1);
   }
@@ -50,6 +53,15 @@ const StyledForm = styled.div`
     outline: none;
     border: none;
     border-radius: 5px;
+  }
+  .intruksi {
+    font-size: 12px;
+    color: red;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    text-align: center;
+    margin: 0 1rem;
   }
   .submit {
     width: 60%;
@@ -101,10 +113,14 @@ const StyledForm = styled.div`
     }
   }
   @media (min-width: 1024px) {
+    h1 {
+      margin: 1rem 0;
+    }
     .main {
       margin-top: 1rem;
       width: 50%;
-      height: 65%;
+      height: 90%;
+      top: 10%;
     }
     input {
       margin: 15px auto;
@@ -120,7 +136,6 @@ export default function AddFormKeuangan({ onCreate }) {
   const navigate = useNavigate();
   const location = useLocation();
   const keuanganToEdit = location.state?.keuangan;
-  console.log(keuanganToEdit);
   const [detail, setDetail] = useState(
     keuanganToEdit ? { name: keuanganToEdit.detail } : null
   );
@@ -136,28 +151,37 @@ export default function AddFormKeuangan({ onCreate }) {
     keuanganToEdit?.saldoTotal || ""
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!detail || !tanggal || !pendapatan || !pengeluaran || !saldoTotal)
-      return;
+    if (!tanggal || !pendapatan || !pengeluaran || !saldoTotal) return;
 
     const newKeuangan = {
       id: keuanganToEdit?.id || Date.now(),
       detail: detail ? detail.name : "", // Jika file ada, ambil nama file
       tanggal,
-      pendapatan,
-      pengeluaran,
-      saldoTotal,
+      pendapatan: Number(pendapatan),
+      pengeluaran: Number(pengeluaran),
+      saldoTotal: Number(saldoTotal),
+      createAt: new Date(),
     };
 
-    onCreate(newKeuangan);
-    // Reset form
-    setDetail(null);
-    setTanggal("");
-    setPendapatan("");
-    setPengeluaran("");
-    setSaldoTotal("");
-    navigate("/keuangan");
+    try {
+      if (keuanganToEdit?.id) {
+        const docRef = doc(db, "keuangan", keuanganToEdit.id);
+        await updateDoc(docRef, newKeuangan);
+      } else {
+        await addDoc(collection(db, "keuangan"), newKeuangan);
+      }
+
+      setDetail(null);
+      setTanggal("");
+      setPendapatan("");
+      setPengeluaran("");
+      setSaldoTotal("");
+      navigate("/keuangan");
+    } catch (err) {
+      console.error("Gagal menyimpan:", err);
+    }
   };
 
   const onDrop = (acceptedFiles) => {
@@ -166,7 +190,14 @@ export default function AddFormKeuangan({ onCreate }) {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    accept: ".csv, .xlsx, .xls, .pdf",
+    accept: {
+      "application/vnd.ms-excel": [".xls"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+        ".xlsx",
+      ],
+      "text/csv": [".csv"],
+      "application/pdf": [".pdf"],
+    },
   });
   return (
     <StyledForm>
@@ -174,7 +205,7 @@ export default function AddFormKeuangan({ onCreate }) {
         <button onClick={() => navigate("/keuangan")}>
           <img src={left} alt="Kembali" />
         </button>
-        <h1 className="text-center mt-5">Buat Laporan Keuangan</h1>
+        <h1 className="text-center">Buat Laporan Keuangan</h1>
         <div className="main">
           <form onSubmit={handleSubmit}>
             <div className="file-input" {...getRootProps()}>
@@ -197,6 +228,9 @@ export default function AddFormKeuangan({ onCreate }) {
               }}
               required
             />
+            <p className="intruksi">
+              Masukkan angka tanpa titik (misalnya 500000 untuk lima ratus ribu)
+            </p>
             <input
               type="number"
               placeholder="Pendapatan"

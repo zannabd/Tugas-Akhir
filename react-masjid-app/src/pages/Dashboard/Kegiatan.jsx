@@ -9,6 +9,9 @@ import ResetFilter from "../../components/Button/resetFilter";
 import Pagination from "../../components/Pagination";
 import { useNavigate } from "react-router-dom";
 import Keuangan from "./Keuangan";
+import { useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase";
 
 const StyledKegiatan = styled.div`
   margin: 10px;
@@ -129,134 +132,32 @@ const StyledKegiatan = styled.div`
     }
   }
 `;
-export default function Kegiatan() {
-  const kegiatanList = [
-    {
-      id: 1,
-      nama: "Kajian Sabtu",
-      tanggal: "13 Mei 2025",
-      lokasi: "Masjid",
-      status: "Mendatang",
-    },
-    {
-      id: 2,
-      nama: "Pengajian Akbar",
-      tanggal: "5 April 2025",
-      lokasi: "Masjid",
-      status: "Selesai",
-    },
-    {
-      id: 3,
-      nama: "Santunan Anak Yatim",
-      tanggal: "1 April 2025",
-      lokasi: "Masjid",
-      status: "Selesai",
-    },
-    {
-      id: 4,
-      nama: "Buka Puasa Bersama",
-      tanggal: "29 Maret 2025",
-      lokasi: "Masjid",
-      status: "Dibatalkan",
-    },
-    {
-      id: 6,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Mendatang",
-    },
-    {
-      id: 7,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Mendatang",
-    },
-    {
-      id: 8,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Mendatang",
-    },
-    {
-      id: 9,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Mendatang",
-    },
-    {
-      id: 10,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Mendatang",
-    },
-    {
-      id: 11,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Dibatalkan",
-    },
-    {
-      id: 12,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Mendatang",
-    },
-    {
-      id: 13,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Dibatalkan",
-    },
-    {
-      id: 14,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Mendatang",
-    },
-    {
-      id: 15,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Mendatang",
-    },
-    {
-      id: 16,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Mendatang",
-    },
-    {
-      id: 17,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Mendatang",
-    },
-    {
-      id: 18,
-      nama: "Kegiatan Sosial",
-      tanggal: "20 April 2025",
-      lokasi: "Lapangan",
-      status: "Mendatang",
-    },
-  ];
+export default function Kegiatan({ isAdmin = true }) {
+  const [kegiatanList, setKegiatanList] = useState([]);
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
+
+  useEffect(() => {
+    const fetchKegiatan = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "kegiatan"));
+        const kegiatanData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setKegiatanList(kegiatanData);
+      } catch (error) {
+        console.error("Error fetching kegiatan:", error);
+      }
+    };
+
+    fetchKegiatan();
+  }, []);
 
   // Filter search n status
   const filteredData = kegiatanList.filter((item) => {
@@ -269,8 +170,8 @@ export default function Kegiatan() {
 
   // Sort tanggal
   const sortedKegiatan = [...filteredData].sort((a, b) => {
-    const dateA = new Date(a.tanggal);
-    const dateB = new Date(b.tanggal);
+    const dateA = new Date(`${a.tanggal}T${a.waktu || "00:00"}`);
+    const dateB = new Date(`${b.tanggal}T${b.waktu || "00:00"}`);
     return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
   });
 
@@ -322,10 +223,12 @@ export default function Kegiatan() {
               </select>
             </div>
             <ResetFilter onReset={handleReset} />
-            <AddButton
-              label="Tambah Kegiatan"
-              onClick={() => navigate("/tambah-kegiatan")}
-            />
+            {isAdmin && (
+              <AddButton
+                label="Tambah Kegiatan"
+                onClick={() => navigate("/form-kegiatan")}
+              />
+            )}
           </div>
         </div>
         <div className="tabel">
@@ -337,9 +240,10 @@ export default function Kegiatan() {
                 <th onClick={handleSort}>
                   Tanggal {sortOrder === "asc" ? "↑" : "↓"}
                 </th>
+                <th>Waktu</th>
                 <th>Lokasi</th>
                 <th>Status</th>
-                <th>Tindakan</th>
+                {isAdmin && <th>Tindakan</th>}
               </tr>
             </thead>
             <tbody>
@@ -350,6 +254,7 @@ export default function Kegiatan() {
                   </td>
                   <td>{item.nama}</td>
                   <td>{item.tanggal}</td>
+                  <td>{item.waktu}</td>
                   <td>{item.lokasi}</td>
                   <td>
                     <div
@@ -368,22 +273,24 @@ export default function Kegiatan() {
                       {item.status}
                     </div>
                   </td>
-                  <td>
-                    <div className="action">
-                      <button
-                        onClick={() =>
-                          navigate("/tambah-kegiatan", {
-                            state: { Keuangan: item },
-                          })
-                        }
-                      >
-                        <img src={Edit} alt="Edit" />
-                      </button>
-                      <button>
-                        <img src={Delete} alt="" />
-                      </button>
-                    </div>
-                  </td>
+                  {isAdmin && (
+                    <td>
+                      <div className="action">
+                        <button
+                          onClick={() =>
+                            navigate("/form-kegiatan", {
+                              state: { Keuangan: item },
+                            })
+                          }
+                        >
+                          <img src={Edit} alt="Edit" />
+                        </button>
+                        <button>
+                          <img src={Delete} alt="" />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

@@ -2,6 +2,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import left from "../../images/left-white.png";
 import { useState } from "react";
 import styled from "styled-components";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../../firebase";
 const StyledForm = styled.div`
   background: linear-gradient(to bottom, #19381f, #53a548, #4c934c);
   display: flex;
@@ -24,6 +26,7 @@ const StyledForm = styled.div`
     font-weight: bold;
     transition: 0.5s ease-in-out;
     cursor: pointer;
+    margin-top: 3rem;
   }
   .main {
     background: #ffffff;
@@ -75,8 +78,11 @@ const StyledForm = styled.div`
   }
 
   @media (min-width: 768px) {
+    h1 {
+      margin-top: 6rem;
+    }
     form {
-      margin-top: 3rem;
+      margin-top: 2rem;
     }
     .main {
       width: 50%;
@@ -89,10 +95,14 @@ const StyledForm = styled.div`
     }
   }
   @media (min-width: 1024px) {
+    h1 {
+      margin-top: 2%;
+    }
     .main {
-      margin-top: 1rem;
+      margin-top: 0.5rem;
       width: 50%;
-      height: 60%;
+      height: 70%;
+      top: 20%;
     }
     input,
     select {
@@ -111,28 +121,36 @@ export default function AddFormKegiatan({ onCreate }) {
   const kegiatanToEdit = location.state?.kegiatan;
   const [nama, setNama] = useState(kegiatanToEdit?.nama || "");
   const [tanggal, setTanggal] = useState(kegiatanToEdit?.tanggal || "");
+  const [waktu, setWaktu] = useState(kegiatanToEdit?.waktu || "");
   const [lokasi, setLokasi] = useState(kegiatanToEdit?.lokasi || "");
   const [status, setStatus] = useState(kegiatanToEdit?.status || "");
   const [inputType, setInputType] = useState("text");
-
-  const handleSubmit = (e) => {
+  const [inputTime, setInputTime] = useState("text");
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nama || !tanggal || !lokasi || !status) return;
+    if (!nama || !tanggal || !waktu || !lokasi || !status) return;
 
+    const id = kegiatanToEdit?.id || Date.now().toString(); // sementara pakai timestamp
     const newKegiatan = {
-      id: kegiatanToEdit?.id || Date.now(), // sementara pakai timestamp
+      id,
       nama,
       tanggal,
+      waktu,
       lokasi,
       status,
     };
-
-    onCreate(newKegiatan);
-    setNama("");
-    setTanggal("");
-    setLokasi("");
-    setStatus("");
-    navigate("/kegiatan");
+    try {
+      await setDoc(doc(db, "kegiatan", id), newKegiatan);
+      onCreate?.(newKegiatan);
+      setNama("");
+      setTanggal("");
+      setWaktu("");
+      setLokasi("");
+      setStatus("");
+      navigate("/kegiatan");
+    } catch (error) {
+      console.error("Gagal menyimpan kegiatan:", error);
+    }
   };
   return (
     <StyledForm>
@@ -140,7 +158,7 @@ export default function AddFormKegiatan({ onCreate }) {
         <button onClick={() => navigate("/kegiatan")}>
           <img src={left} alt="" />
         </button>
-        <h1 className="text-center mt-5">
+        <h1 className="text-center">
           {kegiatanToEdit ? "Edit Kegiatan" : "Membuat Kegiatan"}
         </h1>
         <div className="main">
@@ -164,7 +182,17 @@ export default function AddFormKegiatan({ onCreate }) {
               }}
               required
             />
-
+            <input
+              type={inputTime}
+              placeholder="Waktu"
+              value={waktu}
+              onFocus={() => setInputTime("time")}
+              onChange={(e) => setWaktu(e.target.value)}
+              onBlur={() => {
+                if (!waktu) setInputTime("text");
+              }}
+              required
+            />
             <input
               type="text"
               placeholder="Lokasi"

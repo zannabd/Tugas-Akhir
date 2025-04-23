@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import Edit from "../../images/icons8-edit-48.png";
 import Delete from "../../images/icons8-delete-48.png";
@@ -6,6 +6,8 @@ import AddButton from "../../components/Button/addButton";
 import ResetFilter from "../../components/Button/resetFilter";
 import Pagination from "../../components/Pagination";
 import { useNavigate } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase";
 
 const StyledKeuangan = styled.div`
   margin: 10px;
@@ -94,48 +96,37 @@ const StyledKeuangan = styled.div`
     }
   }
 `;
+// Fungsi format Rupiah
+const formatRupiah = (num) => {
+  if (isNaN(num)) return "Rp 0"; // Jika num bukan angka, tampilkan Rp 0
+  const numStr = num.toString(); // Ubah angka menjadi string
+  return "Rp " + numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
 
-const dataKeuangan = [
-  {
-    id: 1,
-    detail: "file.csv",
-    tanggal: "18 Februari 2024",
-    pendapatan: "Rp5.000.000",
-    pengeluaran: "Rp4.500.000",
-    balance: "Rp55.000.000",
-  },
-  {
-    id: 2,
-    detail: "file.csv",
-    tanggal: "18 Maret 2025",
-    pendapatan: "Rp5.000.000",
-    pengeluaran: "Rp4.500.000",
-    balance: "Rp55.000.000",
-  },
-  {
-    id: 3,
-    detail: "file.csv",
-    tanggal: "18 April 2025",
-    pendapatan: "Rp5.000.000",
-    pengeluaran: "Rp4.500.000",
-    balance: "Rp55.000.000",
-  },
-  {
-    id: 4,
-    detail: "file.csv",
-    tanggal: "18 Mei 2025",
-    pendapatan: "Rp5.000.000",
-    pengeluaran: "Rp4.500.000",
-    balance: "Rp55.000.000",
-  },
-];
-export default function Keuangan() {
+export default function Keuangan({ isAdmin = true }) {
+  const [dataKeuangan, setDataKeuangan] = useState([]);
   const navigate = useNavigate();
   const [bulanDipilih, setBulanDipilih] = useState("");
   const [tahunDipilih, setTahunDipilih] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "keuangan"));
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setDataKeuangan(data);
+      } catch (error) {
+        console.error("Error mengambil data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
   // Ambil semua tahun unik dari data
   const tahunUnik = [
     ...new Set(
@@ -200,10 +191,12 @@ export default function Keuangan() {
               ))}
             </select>
             <ResetFilter onReset={handleReset} />
-            <AddButton
-              label="Buat Laporan"
-              onClick={() => navigate("/buat-laporan")}
-            />
+            {isAdmin && (
+              <AddButton
+                label="Buat Laporan"
+                onClick={() => navigate("/form-laporan")}
+              />
+            )}
           </div>
         </div>
         <div className="tabel">
@@ -216,7 +209,7 @@ export default function Keuangan() {
                 <th>Pendapatan</th>
                 <th>Pengeluahan</th>
                 <th>Saldo Total</th>
-                <th>Tindakan</th>
+                {isAdmin && <th>Tindakan</th>}
               </tr>
             </thead>
             <tbody>
@@ -225,25 +218,34 @@ export default function Keuangan() {
                   <td style={{ textAlign: "center" }}>{index + 1}</td>
                   <td>{item.detail}</td>
                   <td>{item.tanggal}</td>
-                  <td>{item.pendapatan}</td>
-                  <td>{item.pengeluaran}</td>
-                  <td>{item.balance}</td>
                   <td>
-                    <div className="action">
-                      <button
-                        onClick={() =>
-                          navigate("/buat-laporan", {
-                            state: { keuangan: item },
-                          })
-                        }
-                      >
-                        <img src={Edit} alt="Edit" />
-                      </button>
-                      <button>
-                        <img src={Delete} alt="" />
-                      </button>
-                    </div>
+                    {item.pendapatan ? formatRupiah(item.pendapatan) : "Rp 0"}
                   </td>
+                  <td>
+                    {item.pengeluaran ? formatRupiah(item.pengeluaran) : "Rp 0"}
+                  </td>
+                  <td>
+                    {item.saldoTotal ? formatRupiah(item.saldoTotal) : "Rp 0"}
+                  </td>
+
+                  {isAdmin && (
+                    <td>
+                      <div className="action">
+                        <button
+                          onClick={() =>
+                            navigate("/form-laporan", {
+                              state: { keuangan: item },
+                            })
+                          }
+                        >
+                          <img src={Edit} alt="Edit" />
+                        </button>
+                        <button>
+                          <img src={Delete} alt="Delete" />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

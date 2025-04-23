@@ -7,6 +7,9 @@ import right from "../../images/right-arrow.png";
 import styled from "styled-components";
 import { useRef } from "react";
 import EditButton from "../../components/Button/editButton";
+import { useState, useEffect } from "react";
+import { db } from "../../firebase";
+import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 
 const StyledDashboard = styled.div`
   /* CSS untuk Statistik Card */
@@ -144,7 +147,52 @@ align-self: center;
   }
 `;
 export default function Dashboard() {
-  const images = [1, 2, 3, 4];
+  const [totalKegiatan, setTotalKegiatan] = useState(0);
+  const [totalSaldo, setTotalSaldo] = useState(0);
+  const [kegiatanTerbaru, setKegiatanTerbaru] = useState([]);
+  const [images, setImages] = useState([1, 2, 3, 4]);
+
+  useEffect(() => {
+    // ngambil data jumlah kegiatan dari Firestore
+    const getKegiatanData = async () => {
+      const kegiatanSnapshot = await getDocs(collection(db, "kegiatan"));
+      setTotalKegiatan(kegiatanSnapshot.size); // Jumlah dokumen kegiatan
+    };
+
+    // ngambil saldo terakhir dari Firestore
+    const getSaldoData = async () => {
+      const q = query(
+        collection(db, "keuangan"),
+        orderBy("tanggal", "desc"),
+        limit(1)
+      );
+
+      const saldoSnapshot = await getDocs(q);
+      if (!saldoSnapshot.empty) {
+        const latestData = saldoSnapshot.docs[0].data();
+        setTotalSaldo(latestData.saldoTotal || 0); // Ambil saldo total
+      }
+    };
+    // ngambil kegiata terdekat
+    const getKegiatanTerbaru = async () => {
+      const q = query(
+        collection(db, "kegiatan"),
+        orderBy("tanggal", "desc"),
+        limit(2)
+      );
+      const snapshot = await getDocs(q);
+      const kegiatanData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setKegiatanTerbaru(kegiatanData);
+    };
+
+    getKegiatanData();
+    getSaldoData();
+    getKegiatanTerbaru();
+  }, []);
+
   const geser = useRef(null);
 
   const handleGeser = (direction) => {
@@ -163,26 +211,26 @@ export default function Dashboard() {
         <div className="card1">
           <div className="stat-card">
             <div className="stat-info">
-              <img class="stat-icon" src={calendar}></img>
-              <div class="stat-content">
+              <img className="stat-icon" src={calendar}></img>
+              <div className="stat-content">
                 <h4>Total Kegiatan</h4>
-                <p class="stat-value">12 Kegiatan</p>
-                {/* <p class="stat-subtitle">+2 minggu ini</p> */}
+                <p className="stat-value">{totalKegiatan} Kegiatan</p>
+                {/* <p className="stat-subtitle">+2 minggu ini</p> */}
               </div>
             </div>
             <div className="edit-button">
               <EditButton to={"/kegiatan"} />
             </div>
           </div>
-          <div class="stat-card">
+          <div className="stat-card">
             <div className="stat-info">
-              <img class="stat-icon" src={cash}></img>
-              <div class="stat-content">
+              <img className="stat-icon" src={cash}></img>
+              <div className="stat-content">
                 <h4>Total Saldo</h4>
-                <p class="stat-value" src={cash}>
-                  Rp.60.000.000
+                <p className="stat-value" src={cash}>
+                  Rp. {totalSaldo.toLocaleString()}
                 </p>
-                {/* <p class="stat-subtitle">+2 minggu ini</p> */}
+                {/* <p className="stat-subtitle">+2 minggu ini</p> */}
               </div>
             </div>
             <div className="edit-button">
@@ -210,12 +258,14 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>Kajian Sabtu</td>
-                <td>13 Mei 2025</td>
-                <td>Mendatang</td>
-              </tr>
+              {kegiatanTerbaru.map((kegiatan, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>{kegiatan.nama}</td>
+                  <td>{new Date(kegiatan.tanggal).toLocaleDateString()}</td>
+                  <td>{kegiatan.status}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

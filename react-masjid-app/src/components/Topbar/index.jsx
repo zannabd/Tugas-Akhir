@@ -3,7 +3,8 @@ import logo from "../../assets/Al-Ihsan.png";
 import profile from "../../images/admin-profile.png";
 import logout from "../../images/logout.png";
 import styled from "styled-components";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { getAuth, signOut } from "firebase/auth";
 
 const StyledTopbar = styled.div`
   background: #53a548;
@@ -87,7 +88,18 @@ const StyledTopbar = styled.div`
 `;
 export default function Topbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+  const handleLogout = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth);
+      console.log("User signed out");
+      navigate("/");
+    } catch (error) {
+      console.error("Error saat logout:", error);
+    }
+  };
   return (
     <StyledTopbar>
       <>
@@ -105,11 +117,87 @@ export default function Topbar() {
             <h3 className="d-flex justify-content-center">
               <i>Admin</i>
             </h3>
-            <button onClick={() => navigate("/")} className="d-flex fw-bold">
+            <button
+              onClick={() => setShowModal(true)}
+              className="d-flex fw-bold"
+            >
               Logout <img src={logout} alt="logout.png" />
             </button>
           </div>
         </div>
+        {showModal && (
+          <div
+            className="modal fade show"
+            style={{
+              display: "block",
+              backgroundColor: "rgba(0,0,0,0.5)",
+            }}
+            tabIndex="-1"
+            role="dialog"
+          >
+            <div className="modal-dialog modal-dialog-centered" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Konfirmasi Logout</h5>
+                  <button
+                    type="button"
+                    className="close"
+                    onClick={() => setShowModal(false)}
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <p>Apakah Anda yakin ingin keluar?</p>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary px-4"
+                    style={{
+                      color: "white",
+                      backgroundColor: "#6c757d",
+                      borderColor: "#6c757d",
+                      transition: "background-color 0.3s, border-color 0.3s",
+                    }}
+                    onClick={() => setShowModal(false)}
+                    onMouseEnter={(e) =>
+                      (e.target.style.backgroundColor = "#5a6268")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.target.style.backgroundColor = "#6c757d")
+                    }
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger fw-bold px-4"
+                    style={{
+                      color: "white",
+                      backgroundColor: "#dc3545",
+                      borderColor: "#dc3545",
+                      transition: "background-color 0.3s, border-color 0.3s",
+                    }}
+                    onClick={() => {
+                      setShowModal(false);
+                      handleLogout();
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.target.style.backgroundColor = "#c82333")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.target.style.backgroundColor = "#dc3545")
+                    }
+                  >
+                    Ya, Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </>
     </StyledTopbar>
   );

@@ -167,7 +167,7 @@ export default function Dokumentasi() {
 
             <AddButton
               label="Upload Dokumentasi"
-              onClick={() => navigate("/upload-dokumentasi")}
+              onClick={() => navigate("/form-dokumentasi")}
             />
           </div>
         </div>

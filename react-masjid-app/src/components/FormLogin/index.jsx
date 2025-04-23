@@ -2,6 +2,8 @@ import styled from "styled-components";
 import left from "../../images/left-white.png";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase";
 
 const StyledForm = styled.div`
   background: linear-gradient(to bottom, #19381f, #53a548, #4c934c);
@@ -70,7 +72,7 @@ const StyledForm = styled.div`
   }
   @media (min-width: 768px) {
     form {
-      margin-top: 3rem;
+      margin-top: 5rem;
     }
     input {
       height: 45px;
@@ -92,19 +94,31 @@ export default function FormLogin() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    const userFound = users.find(
-      (user) => user.email === email && user.password === password
-    );
-    if (userFound) {
-      setAlertMessage("Login berhasil!");
-      setAlertType("success");
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000); // kasih delay biar alert sempat tampil
-    } else {
-      setAlertMessage("Email atau password salah");
-      setAlertType("danger");
-    }
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        setAlertMessage("Login berhasil!");
+        setAlertType("success");
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        let message = "Email atau password salah";
+
+        if (errorCode === "auth/invalid-email") {
+          message = "Format email tidak valid.";
+        } else if (errorCode === "auth/user-not-found") {
+          message = "Email tidak ditemukan.";
+        } else if (errorCode === "auth/wrong-password") {
+          message = "Password salah.";
+        }
+
+        setAlertMessage(message);
+        setAlertType("danger");
+      });
   };
   return (
     <StyledForm>
@@ -124,6 +138,9 @@ export default function FormLogin() {
                   borderTopLeftRadius: "20px",
                   borderBottomRightRadius: "0",
                   borderBottomLeftRadius: "0",
+                  position: "absolute",
+                  top: "0%",
+                  width: "100%",
                 }}
               >
                 {alertMessage}
