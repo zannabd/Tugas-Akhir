@@ -4,7 +4,15 @@ import { useState } from "react";
 import styled from "styled-components";
 import { useDropzone } from "react-dropzone";
 import { db } from "../../firebase"; // pastikan path ini sesuai
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  updateDoc,
+  onSnapshot,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
 
 const StyledForm = styled.div`
   background: linear-gradient(to bottom, #19381f, #53a548, #4c934c);
@@ -150,14 +158,15 @@ export default function AddFormKeuangan({ onCreate }) {
   const [saldoTotal, setSaldoTotal] = useState(
     keuanganToEdit?.saldoTotal || ""
   );
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tanggal || !pendapatan || !pengeluaran || !saldoTotal) return;
 
     const newKeuangan = {
-      id: keuanganToEdit?.id || Date.now(),
-      detail: detail ? detail.name : "", // Jika file ada, ambil nama file
+      // detail: detail ? detail.name : "", // Jika file ada, ambil nama file
       tanggal,
       pendapatan: Number(pendapatan),
       pengeluaran: Number(pengeluaran),
@@ -167,10 +176,16 @@ export default function AddFormKeuangan({ onCreate }) {
 
     try {
       if (keuanganToEdit?.id) {
+        // EDIT
         const docRef = doc(db, "keuangan", keuanganToEdit.id);
         await updateDoc(docRef, newKeuangan);
+        setAlertMessage("Laporan keuangan berhasil diperbarui!");
+        setAlertType("success");
       } else {
-        await addDoc(collection(db, "keuangan"), newKeuangan);
+        // TAMBAH BARU
+        const docRef = await addDoc(collection(db, "keuangan"), newKeuangan);
+        setAlertMessage("Laporan keuangan berhasil ditambahkan!");
+        setAlertType("success");
       }
 
       setDetail(null);
@@ -178,9 +193,13 @@ export default function AddFormKeuangan({ onCreate }) {
       setPendapatan("");
       setPengeluaran("");
       setSaldoTotal("");
-      navigate("/keuangan");
+      setTimeout(() => {
+        navigate("/keuangan");
+      }, 1500);
     } catch (err) {
       console.error("Gagal menyimpan:", err);
+      setAlertMessage("Terjadi kesalahan, coba lagi!");
+      setAlertType("error");
     }
   };
 
@@ -207,6 +226,18 @@ export default function AddFormKeuangan({ onCreate }) {
         </button>
         <h1 className="text-center">Buat Laporan Keuangan</h1>
         <div className="main">
+          {alertMessage && (
+            <div
+              className={`alert alert-${alertType} mt-3`}
+              role="alert"
+              style={{
+                display: "flex",
+                position: "absolute",
+              }}
+            >
+              {alertMessage}
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
             <div className="file-input" {...getRootProps()}>
               <input {...getInputProps()} />

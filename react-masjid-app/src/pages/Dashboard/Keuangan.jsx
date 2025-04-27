@@ -6,7 +6,7 @@ import AddButton from "../../components/Button/addButton";
 import ResetFilter from "../../components/Button/resetFilter";
 import Pagination from "../../components/Pagination";
 import { useNavigate } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase";
 
 const StyledKeuangan = styled.div`
@@ -105,28 +105,56 @@ const formatRupiah = (num) => {
 
 export default function Keuangan({ isAdmin = true }) {
   const [dataKeuangan, setDataKeuangan] = useState([]);
+  const [selectedDataDelete, setSelectedDataDelete] = useState(null);
   const navigate = useNavigate();
   const [bulanDipilih, setBulanDipilih] = useState("");
   const [tahunDipilih, setTahunDipilih] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchKeuangan = async () => {
       try {
         const snapshot = await getDocs(collection(db, "keuangan"));
         const data = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
+        // Sort dari tanggal/bulan terbaru
+        const sortedData = data.sort((a, b) => {
+          const dateA = new Date(a.tanggal);
+          const dateB = new Date(b.tanggal);
+          return dateB - dateA; // Terbaru duluan
+        });
         setDataKeuangan(data);
       } catch (error) {
         console.error("Error mengambil data:", error);
       }
     };
 
-    fetchData();
+    fetchKeuangan();
   }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, "keuangan", id));
+      setAlertMessage("Data berhasil dihapus!"); // Menampilkan pesan alert
+      setAlertType("success");
+      setDataKeuangan((prev) => prev.filter((item) => item.id !== id));
+      setSelectedDataDelete(null);
+      setTimeout(() => {
+        setAlertMessage("");
+        setAlertType("");
+      }, 2000);
+    } catch (error) {
+      setAlertMessage("Terjadi kesalahan, gagal menghapus data.");
+      setAlertType("error");
+      console.error("Error deleting data:", error);
+    }
+  };
+
   // Ambil semua tahun unik dari data
   const tahunUnik = [
     ...new Set(
@@ -154,6 +182,22 @@ export default function Keuangan({ isAdmin = true }) {
   return (
     <StyledKeuangan>
       <>
+        {alertMessage && (
+          <div
+            className={`alert alert-${alertType}`}
+            role="alert"
+            style={{
+              display: "block",
+              position: "fixed",
+              zIndex: "100",
+              justifyContent: "center",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            {alertMessage}
+          </div>
+        )}
         <div className="desc">
           <h4>{dataKeuangan.length} Total Laporan</h4>
           <div className="filtered">
@@ -240,7 +284,7 @@ export default function Keuangan({ isAdmin = true }) {
                         >
                           <img src={Edit} alt="Edit" />
                         </button>
-                        <button>
+                        <button onClick={() => setSelectedDataDelete(item)}>
                           <img src={Delete} alt="Delete" />
                         </button>
                       </div>
@@ -250,6 +294,48 @@ export default function Keuangan({ isAdmin = true }) {
               ))}
             </tbody>
           </table>
+          {selectedDataDelete && (
+            <div
+              className="modal fade show"
+              style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+              tabIndex="-1"
+            >
+              <div className="modal-dialog">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Konfirmasi Hapus</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setSelectedDataDelete(null)}
+                    ></button>
+                  </div>
+                  <div className="modal-body">
+                    <p>
+                      Apakah kamu yakin ingin menghapus laporan{" "}
+                      <strong>{selectedDataDelete.tanggal}</strong>?
+                    </p>
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setSelectedDataDelete(null)}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => handleDelete(selectedDataDelete.id)}
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         <Pagination
           currentPage={currentPage}

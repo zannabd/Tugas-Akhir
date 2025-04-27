@@ -10,7 +10,13 @@ import Pagination from "../../components/Pagination";
 import { useNavigate } from "react-router-dom";
 import Keuangan from "./Keuangan";
 import { useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  getDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+} from "firebase/firestore";
 import { db } from "../../firebase";
 
 const StyledKegiatan = styled.div`
@@ -138,27 +144,70 @@ export default function Kegiatan({ isAdmin = true }) {
   const [statusFilter, setStatusFilter] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [selectedDataDelete, setSelectedDataDelete] = useState(null);
   const [data, setData] = useState([]);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
   useEffect(() => {
-    const fetchKegiatan = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "kegiatan"));
+    const unsubscribe = onSnapshot(
+      collection(db, "kegiatan"),
+      (querySnapshot) => {
         const kegiatanData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         setKegiatanList(kegiatanData);
-      } catch (error) {
+      },
+      (error) => {
         console.error("Error fetching kegiatan:", error);
       }
-    };
+    );
 
-    fetchKegiatan();
+    // Clean up the listener on unmount
+    return () => unsubscribe();
   }, []);
 
+  const handleDelete = async (id) => {
+    try {
+      // Cek dokumen yang ingin dihapus
+      console.log("ID yang dikirim untuk dihapus:", id);
+      const docRef = doc(db, "kegiatan", id);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        console.log("Dokumen ditemukan, melanjutkan penghapusan");
+
+        // Hapus dokumen jika ditemukan
+        await deleteDoc(docRef);
+
+        console.log(`Kegiatan dengan ID ${id} berhasil dihapus dari Firestore`);
+        setAlertMessage("Kegiatan berhasil dihapus!");
+        setAlertType("success");
+        setTimeout(() => {
+          setKegiatanList((prev) => prev.filter((item) => item.id !== id));
+          setSelectedDataDelete(null);
+          setAlertMessage("");
+          setAlertType("");
+        }, 2000);
+      } else {
+        console.log("Dokumen tidak ditemukan!");
+        setAlertMessage("Kegiatan tidak ditemukan!");
+        setAlertType("danger");
+      }
+    } catch (error) {
+      console.error("Error deleting data from Firestore:", error);
+      setAlertMessage("Gagal menghapus kegiatan. Silakan coba lagi.");
+      setAlertType("danger");
+
+      setTimeout(() => {
+        setAlertMessage("");
+        setAlertType("");
+      }, 2000);
+    }
+  };
   // Filter search n status
   const filteredData = kegiatanList.filter((item) => {
     const keywordMatch = item.nama
@@ -193,6 +242,22 @@ export default function Kegiatan({ isAdmin = true }) {
   return (
     <StyledKegiatan>
       <>
+        {alertMessage && (
+          <div
+            className={`alert alert-${alertType}`}
+            role="alert"
+            style={{
+              display: "flex",
+              position: "absolute",
+              zIndex: "100",
+              justifyContent: "center",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            {alertMessage}
+          </div>
+        )}
         <div className="desc">
           <h4>{filteredData.length} Total Kegiatan</h4>
           <div className="filtered">
@@ -214,9 +279,7 @@ export default function Kegiatan({ isAdmin = true }) {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <option value="" disabled selected>
-                  Status
-                </option>
+                <option value="">Status</option>
                 <option value="Mendatang">Mendatang</option>
                 <option value="Selesai">Selesai</option>
                 <option value="Dibatalkan">Dibatalkan</option>
@@ -253,9 +316,9 @@ export default function Kegiatan({ isAdmin = true }) {
                     {indexOfFirstRow + index + 1}
                   </td>
                   <td>{item.nama}</td>
-                  <td>{item.tanggal}</td>
-                  <td>{item.waktu}</td>
-                  <td>{item.lokasi}</td>
+                  <td>{item.tanggal || "-"}</td>
+                  <td>{item.waktu || "-"}</td>
+                  <td>{item.lokasi || "-"}</td>
                   <td>
                     <div
                       className="status"
@@ -279,13 +342,13 @@ export default function Kegiatan({ isAdmin = true }) {
                         <button
                           onClick={() =>
                             navigate("/form-kegiatan", {
-                              state: { Keuangan: item },
+                              state: { kegiatan: item },
                             })
                           }
                         >
                           <img src={Edit} alt="Edit" />
                         </button>
-                        <button>
+                        <button onClick={() => setSelectedDataDelete(item)}>
                           <img src={Delete} alt="" />
                         </button>
                       </div>
@@ -295,6 +358,51 @@ export default function Kegiatan({ isAdmin = true }) {
               ))}
             </tbody>
           </table>
+          {selectedDataDelete && (
+            <div
+              className="modal fade show"
+              style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+              tabIndex="-1"
+            >
+              <div className="modal-dialog">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Konfirmasi Hapus</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setSelectedDataDelete(null)}
+                    ></button>
+                  </div>
+                  <div className="modal-body">
+                    <p>
+                      Apakah kamu yakin ingin menghapus kegiatan{" "}
+                      <strong>{selectedDataDelete.nama}</strong>?
+                    </p>
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setSelectedDataDelete(null)}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={async () => {
+                        await handleDelete(selectedDataDelete.id);
+                        setSelectedDataDelete(null);
+                      }}
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         {/* Pagination */}
         <Pagination

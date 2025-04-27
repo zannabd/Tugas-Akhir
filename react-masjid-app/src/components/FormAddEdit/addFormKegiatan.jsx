@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import left from "../../images/left-white.png";
 import { useState } from "react";
 import styled from "styled-components";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, addDoc, updateDoc, collection } from "firebase/firestore";
 import { db } from "../../firebase";
 const StyledForm = styled.div`
   background: linear-gradient(to bottom, #19381f, #53a548, #4c934c);
@@ -126,13 +126,15 @@ export default function AddFormKegiatan({ onCreate }) {
   const [status, setStatus] = useState(kegiatanToEdit?.status || "");
   const [inputType, setInputType] = useState("text");
   const [inputTime, setInputTime] = useState("text");
+
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!nama || !tanggal || !waktu || !lokasi || !status) return;
 
-    const id = kegiatanToEdit?.id || Date.now().toString(); // sementara pakai timestamp
     const newKegiatan = {
-      id,
       nama,
       tanggal,
       waktu,
@@ -140,16 +142,32 @@ export default function AddFormKegiatan({ onCreate }) {
       status,
     };
     try {
-      await setDoc(doc(db, "kegiatan", id), newKegiatan);
-      onCreate?.(newKegiatan);
-      setNama("");
-      setTanggal("");
-      setWaktu("");
-      setLokasi("");
-      setStatus("");
-      navigate("/kegiatan");
-    } catch (error) {
-      console.error("Gagal menyimpan kegiatan:", error);
+      if (kegiatanToEdit?.id) {
+        // for edit
+        const docRef = doc(db, "kegiatan", kegiatanToEdit.id);
+        await updateDoc(docRef, newKegiatan);
+        setAlertMessage("Kegiatan berhasil diperbarui!");
+        setAlertType("success");
+      } else {
+        // for add
+        const docRef = await addDoc(collection(db, "kegiatan"), newKegiatan);
+        await updateDoc(docRef, { id: docRef.id }); // abis add, update field id di dokumen
+        setAlertMessage("Kegiatan berhasil ditambahkan!");
+        setAlertType("success");
+      }
+      setTimeout(() => {
+        navigate("/kegiatan");
+        setAlertMessage("");
+        setAlertType("");
+      }, 1500);
+    } catch (err) {
+      console.error("Gagal menyimpan:", err);
+      setAlertMessage("Tindakan gagal! Silakan coba lagi.");
+      setAlertType("danger");
+      setTimeout(() => {
+        setAlertMessage("");
+        setAlertType("");
+      }, 2000);
     }
   };
   return (
@@ -162,6 +180,18 @@ export default function AddFormKegiatan({ onCreate }) {
           {kegiatanToEdit ? "Edit Kegiatan" : "Membuat Kegiatan"}
         </h1>
         <div className="main">
+          {alertMessage && (
+            <div
+              className={`alert alert-${alertType} mt-3`}
+              role="alert"
+              style={{
+                display: "flex",
+                position: "absolute",
+              }}
+            >
+              {alertMessage}
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
             <input
               type="text"
