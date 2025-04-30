@@ -1,7 +1,10 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import left from "../../images/left-white.png";
+import { db } from "../../firebase";
+import { collection, addDoc, doc, updateDoc } from "firebase/firestore";
+import { cloudName, uploadPreset } from "../../cloudinary";
 
 const StyledForm = styled.div`
   background: linear-gradient(to bottom, #19381f, #53a548, #4c934c);
@@ -66,10 +69,23 @@ const StyledForm = styled.div`
 
 export default function AddFormDokumentasi({ onCreate }) {
   const navigate = useNavigate();
-  const [kegiatan, setKegiatan] = useState("");
-  const [keterangan, setKeterangan] = useState("");
+  const location = useLocation();
+  const dokumentasiToEdit = location.state?.dokumentasi;
+  const [kegiatan, setKegiatan] = useState(dokumentasiToEdit?.kegiatan || "");
+  const [keterangan, setKeterangan] = useState(
+    dokumentasiToEdit?.keterangan || ""
+  );
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (dokumentasiToEdit?.imageUrl) {
+      setPreview(dokumentasiToEdit.imageUrl); // Menampilkan gambar yang ada saat edit
+    }
+  }, [dokumentasiToEdit?.imageUrl]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -81,24 +97,72 @@ export default function AddFormDokumentasi({ onCreate }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const uploadToCloudinary = async (file) => {
+    const dokumentasi = new FormData();
+    dokumentasi.append("file", file);
+    dokumentasi.append("upload_preset", uploadPreset);
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      {
+        method: "POST",
+        body: dokumentasi,
+      }
+    );
+    const data = await res.json();
+    // if (data.secure_url) {
+    //   console.log("Image uploaded to Cloudinary: ", data.secure_url);
+    // } else {
+    //   console.log("Cloudinary upload failed:", data);
+    // }
+    return data.secure_url;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!image || !kegiatan) return;
+    if (!kegiatan) return;
 
-    const newEntry = {
-      id: Date.now(),
-      kegiatan,
-      keterangan,
-      src: preview || URL.createObjectURL(image),
-    };
+    setLoading(true);
 
-    onCreate(newEntry);
+    try {
+      let imageUrl = dokumentasiToEdit?.image || "";
 
-    // Reset form
-    setKegiatan("");
-    setKeterangan("");
-    setImage(null);
-    setPreview(null);
+      if (image) {
+        imageUrl = await uploadToCloudinary(image);
+      }
+      const newEntry = {
+        image: imageUrl,
+        kegiatan,
+        keterangan,
+        createdAt: new Date(),
+      };
+      if (dokumentasiToEdit?.id) {
+        const docRef = doc(db, "dokumentasi", dokumentasiToEdit.id);
+        await updateDoc(docRef, newEntry);
+        setAlertMessage("Dokumentsi berhasil diperbarui!");
+        setAlertType("success");
+      } else {
+        await addDoc(collection(db, "dokumentasi"), newEntry);
+        setAlertMessage("Dokumentsi berhasil ditambahkan!");
+        setAlertType("success");
+      }
+
+      setTimeout(() => {
+        setKegiatan("");
+        setKeterangan("");
+        setImage(null);
+
+        if (onCreate) {
+          onCreate(newEntry);
+        }
+        console.log("Berhasil simpan ke Firestore");
+        navigate("/dokumentasi");
+      }, 1500);
+    } catch (error) {
+      console.error("Gagal simpan ke Firestore:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -108,37 +172,74 @@ export default function AddFormDokumentasi({ onCreate }) {
       </button>
       <h1>Tambah Dokumentasi</h1>
       <div className="main">
-        <form onSubmit={handleSubmit}>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            required
-          />
-          {preview && (
-            <img
-              src={preview}
-              alt="Preview"
-              style={{ width: "100%", borderRadius: "10px", marginTop: "1rem" }}
+        {alertMessage && (
+          <div
+            className={`alert alert-${alertType} mt-3`}
+            role="alert"
+            style={{
+              display: "flex",
+              position: "absolute",
+            }}
+          >
+            {alertMessage}
+          </div>
+        )}
+        {loading ? ( // Tampilkan spinner saat loading
+          <div className="loading-container">
+            <div className="loading-spinner"></div> {/* Spinner */}
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <input type="file" accept="image/*" onChange={handleImageChange} />
+            {preview ? (
+              <img
+                src={preview}
+                alt="Preview"
+                style={{
+                  width: "200px",
+                  height: "200px",
+                  objectFit: "cover",
+                  borderRadius: "10px",
+                  marginTop: "1rem",
+                  display: "block",
+                  marginLeft: "auto",
+                  marginRight: "auto",
+                }}
+              />
+            ) : dokumentasiToEdit?.imageUrl ? (
+              <img
+                src={dokumentasiToEdit.imageUrl}
+                alt="Dokumentasi"
+                style={{
+                  width: "200px",
+                  height: "200px",
+                  objectFit: "cover",
+                  borderRadius: "10px",
+                  marginTop: "1rem",
+                  display: "block",
+                  marginLeft: "auto",
+                  marginRight: "auto",
+                }}
+              />
+            ) : null}
+            <input
+              type="text"
+              placeholder="Nama Kegiatan"
+              value={kegiatan}
+              onChange={(e) => setKegiatan(e.target.value)}
+              required
             />
-          )}
-          <input
-            type="text"
-            placeholder="Nama Kegiatan"
-            value={kegiatan}
-            onChange={(e) => setKegiatan(e.target.value)}
-            required
-          />
-          <textarea
-            placeholder="Keterangan"
-            value={keterangan}
-            onChange={(e) => setKeterangan(e.target.value)}
-            rows={4}
-          />
-          <button type="submit" className="submit">
-            Simpan
-          </button>
-        </form>
+            <textarea
+              placeholder="Keterangan"
+              value={keterangan}
+              onChange={(e) => setKeterangan(e.target.value)}
+              rows={4}
+            />
+            <button type="submit" className="submit">
+              Simpan
+            </button>
+          </form>
+        )}
       </div>
     </StyledForm>
   );

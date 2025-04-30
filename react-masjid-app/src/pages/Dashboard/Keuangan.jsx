@@ -8,6 +8,7 @@ import Pagination from "../../components/Pagination";
 import { useNavigate } from "react-router-dom";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase";
+import FilePreview from "../../components/FilePreview";
 
 const StyledKeuangan = styled.div`
   margin: 10px;
@@ -21,6 +22,7 @@ const StyledKeuangan = styled.div`
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     align-items: center;
+    min-width:100%;
   }
   h4 {
     color: #4c934c;
@@ -128,7 +130,7 @@ export default function Keuangan({ isAdmin = true }) {
           const dateB = new Date(b.tanggal);
           return dateB - dateA; // Terbaru duluan
         });
-        setDataKeuangan(data);
+        setDataKeuangan(sortedData);
       } catch (error) {
         console.error("Error mengambil data:", error);
       }
@@ -260,7 +262,10 @@ export default function Keuangan({ isAdmin = true }) {
               {filterData.map((item, index) => (
                 <tr key={item.id}>
                   <td style={{ textAlign: "center" }}>{index + 1}</td>
-                  <td>{item.detail}</td>
+                  <td>
+                    {" "}
+                    {item.detail && <FilePreview fileUrl={item.detail} />}
+                  </td>
                   <td>{item.tanggal}</td>
                   <td>
                     {item.pendapatan ? formatRupiah(item.pendapatan) : "Rp 0"}

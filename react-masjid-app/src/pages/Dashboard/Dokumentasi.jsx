@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import AddButton from "../../components/Button/addButton";
 import edit from "../../images/icons8-edit-48.png";
@@ -7,6 +7,14 @@ import Pagination from "../../components/Pagination";
 import search from "../../images/icons8-search-50.png";
 import { useNavigate } from "react-router-dom";
 import ResetFilter from "../../components/Button/resetFilter";
+import {
+  doc,
+  getDocs,
+  deleteDoc,
+  collection,
+  getDoc,
+} from "firebase/firestore";
+import { db } from "../../firebase";
 
 const StyledDokumentasi = styled.div`
   margin: 10px;
@@ -20,6 +28,7 @@ const StyledDokumentasi = styled.div`
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     align-items: center;
+    min-width: 100%;
   }
   .judul {
     color: #4c934c;
@@ -63,6 +72,7 @@ const StyledDokumentasi = styled.div`
     border: 1px solid grey;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-width: 100%;
   }
   .galeri {
     display: flex;
@@ -77,6 +87,12 @@ const StyledDokumentasi = styled.div`
     color: #fff;
     border-radius: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .galeri-item img {
+    width: 100%;
+    max-width: 250px;
+    border-radius: 20px;
+    margin-bottom: 10px;
   }
   .action {
     display: flex;
@@ -101,33 +117,74 @@ const StyledDokumentasi = styled.div`
     width: 1060px;
   }
 `;
-const images = [
-  {
-    id: 1,
-    src: "https://picsum.photos/300/200?random=1",
-    kegiatan: "Kajian Subuh",
-    keterangan: "Bersama Ust. Ahmad",
-  },
-  {
-    id: 2,
-    src: "https://picsum.photos/300/200?random=2",
-    kegiatan: "Santunan Anak Yatim",
-    keterangan: "Ramadhan 1446H",
-  },
-  {
-    id: 3,
-    src: "https://picsum.photos/300/200?random=3",
-    kegiatan: "Buka Puasa Bersama",
-    keterangan: "Kumpulan warga van gogh",
-  },
-  // Tambahkan lebih banyak gambar jika perlu
-];
 
-export default function Dokumentasi() {
+export default function Dokumentasi({ isAdmin = true }) {
   const navigate = useNavigate();
+  const [selectedDataDelete, setSelectedDataDelete] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [images, setImages] = useState([]);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
   const rowsPerPage = 16;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "dokumentasi"));
+        const docs = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setImages(docs);
+      } catch (error) {
+        console.error("Gagal mengambil data dokumentasi:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      // Cek dokumen yang ingin dihapus
+      console.log("ID yang dikirim untuk dihapus:", id);
+      const docRef = doc(db, "dokumentasi", id);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        console.log("Dokumen ditemukan, melanjutkan penghapusan");
+
+        // Hapus dokumen jika ditemukan
+        await deleteDoc(docRef);
+
+        console.log(
+          `Dokumentasi dengan ID ${id} berhasil dihapus dari Firestore`
+        );
+        setAlertMessage("Dokumentasi berhasil dihapus!");
+        setAlertType("success");
+        setTimeout(() => {
+          setImages((prev) => prev.filter((item) => item.id !== id));
+          setSelectedDataDelete(null);
+          setAlertMessage("");
+          setAlertType("");
+        }, 2000);
+      } else {
+        console.log("Dokumen tidak ditemukan!");
+        setAlertMessage("Dokumentasi tidak ditemukan!");
+        setAlertType("danger");
+      }
+    } catch (error) {
+      console.error("Error deleting data from Firestore:", error);
+      setAlertMessage("Gagal menghapus dokumentasi. Silakan coba lagi.");
+      setAlertType("danger");
+
+      setTimeout(() => {
+        setAlertMessage("");
+        setAlertType("");
+      }, 2000);
+    }
+  };
 
   const filteredImages = images.filter(
     (item) =>
@@ -164,11 +221,12 @@ export default function Dokumentasi() {
               </button>
             </div>
             <ResetFilter onReset={handleReset} />
-
-            <AddButton
-              label="Upload Dokumentasi"
-              onClick={() => navigate("/form-dokumentasi")}
-            />
+            {isAdmin && (
+              <AddButton
+                label="Upload Dokumentasi"
+                onClick={() => navigate("/form-dokumentasi")}
+              />
+            )}
           </div>
         </div>
         <div className="galeri-container">
@@ -176,20 +234,35 @@ export default function Dokumentasi() {
             {currentImages.length > 0 ? (
               currentImages.map((item) => (
                 <div key={item.id} className="galeri-item">
-                  <img src={item.src} alt={`Dokumentasi ${item.kegiatan}`} />
+                  <img
+                    src={
+                      item.image && item.image !== ""
+                        ? item.image
+                        : "path/to/default-image.jpg"
+                    }
+                    alt={`Dokumentasi ${item.kegiatan}`}
+                  />
                   <div className="caption">
                     <p>
                       <strong>{item.kegiatan}</strong>
                     </p>
                     <p>{item.keterangan}</p>
-                    <div className="action">
-                      <button>
-                        <img src={edit} alt="" />
-                      </button>
-                      <button>
-                        <img src={hapus} alt="" />
-                      </button>
-                    </div>
+                    {isAdmin && (
+                      <div className="action">
+                        <button
+                          onClick={() =>
+                            navigate("/form-dokumentasi", {
+                              state: { dokumentasi: item },
+                            })
+                          }
+                        >
+                          <img src={edit} alt="" />
+                        </button>
+                        <button onClick={() => setSelectedDataDelete(item)}>
+                          <img src={hapus} alt="" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))
@@ -198,6 +271,51 @@ export default function Dokumentasi() {
             )}
           </div>
         </div>
+        {selectedDataDelete && (
+          <div
+            className="modal fade show"
+            style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+            tabIndex="-1"
+          >
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Konfirmasi Hapus</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setSelectedDataDelete(null)}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <p>
+                    Apakah kamu yakin ingin menghapus kegiatan{" "}
+                    <strong>{selectedDataDelete.nama}</strong>?
+                  </p>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setSelectedDataDelete(null)}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={async () => {
+                      await handleDelete(selectedDataDelete.id);
+                      setSelectedDataDelete(null);
+                    }}
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

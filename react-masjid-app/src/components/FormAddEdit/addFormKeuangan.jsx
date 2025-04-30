@@ -13,6 +13,7 @@ import {
   getDoc,
   setDoc,
 } from "firebase/firestore";
+import { cloudName, uploadPreset } from "../../cloudinary";
 
 const StyledForm = styled.div`
   background: linear-gradient(to bottom, #19381f, #53a548, #4c934c);
@@ -144,6 +145,8 @@ export default function AddFormKeuangan({ onCreate }) {
   const navigate = useNavigate();
   const location = useLocation();
   const keuanganToEdit = location.state?.keuangan;
+  const [file, setFile] = useState(null);
+  const [uploadUrl, setUploadUrl] = useState("");
   const [detail, setDetail] = useState(
     keuanganToEdit ? { name: keuanganToEdit.detail } : null
   );
@@ -161,20 +164,44 @@ export default function AddFormKeuangan({ onCreate }) {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("");
 
+  const uploadDetail = async (file, folderName) => {
+    const detailKeuangan = new FormData();
+    detailKeuangan.append("file", file);
+    detailKeuangan.append("upload_preset", uploadPreset);
+    detailKeuangan.append("resource_type", "raw");
+    detailKeuangan.append("folder", folderName);
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
+      {
+        method: "POST",
+        body: detailKeuangan,
+      }
+    );
+    const data = await res.json();
+    setUploadUrl(data.secure_url);
+    return data.secure_url;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tanggal || !pendapatan || !pengeluaran || !saldoTotal) return;
 
-    const newKeuangan = {
-      // detail: detail ? detail.name : "", // Jika file ada, ambil nama file
-      tanggal,
-      pendapatan: Number(pendapatan),
-      pengeluaran: Number(pengeluaran),
-      saldoTotal: Number(saldoTotal),
-      createAt: new Date(),
-    };
-
     try {
+      let fileUrl = "";
+
+      if (detail) {
+        fileUrl = await uploadDetail(detail, "keuangan");
+      }
+
+      const newKeuangan = {
+        detail: fileUrl || "",
+        tanggal,
+        pendapatan: Number(pendapatan),
+        pengeluaran: Number(pengeluaran),
+        saldoTotal: Number(saldoTotal),
+        createdAt: new Date(),
+      };
+
       if (keuanganToEdit?.id) {
         // EDIT
         const docRef = doc(db, "keuangan", keuanganToEdit.id);
@@ -183,7 +210,7 @@ export default function AddFormKeuangan({ onCreate }) {
         setAlertType("success");
       } else {
         // TAMBAH BARU
-        const docRef = await addDoc(collection(db, "keuangan"), newKeuangan);
+        await addDoc(collection(db, "keuangan"), newKeuangan);
         setAlertMessage("Laporan keuangan berhasil ditambahkan!");
         setAlertType("success");
       }
@@ -204,7 +231,9 @@ export default function AddFormKeuangan({ onCreate }) {
   };
 
   const onDrop = (acceptedFiles) => {
-    setDetail(acceptedFiles[0]);
+    const file = acceptedFiles[0];
+    setDetail(file); // Simpan file yang di-upload
+    uploadDetail(file, "keuangan");
   };
 
   const { getRootProps, getInputProps } = useDropzone({
