@@ -148,10 +148,17 @@ export default function Dokumentasi({ isAdmin = true }) {
     const fetchData = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "dokumentasi"));
-        const docs = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const docs = querySnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .sort((a, b) => {
+            const timeA = a.createdAt?.seconds || 0;
+            const timeB = b.createdAt?.seconds || 0;
+            return timeB - timeA;
+          });
+
         setImages(docs);
       } catch (error) {
         console.error("Gagal mengambil data dokumentasi:", error);
@@ -218,6 +225,22 @@ export default function Dokumentasi({ isAdmin = true }) {
   };
   return (
     <StyledDokumentasi>
+      {alertMessage && (
+        <div
+          className={`alert alert-${alertType}`}
+          role="alert"
+          style={{
+            display: "flex",
+            position: "absolute",
+            zIndex: "100",
+            justifyContent: "center",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          {alertMessage}
+        </div>
+      )}
       <div className="galeri-wrapper">
         <div className="desc">
           <h3 className="judul">{images.length} Total Galeri Kegiatan</h3>

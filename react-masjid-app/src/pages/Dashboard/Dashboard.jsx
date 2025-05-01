@@ -105,6 +105,7 @@ align-self: center;
     padding: 8px;
     flex: 0 0 auto;
     scroll-snap-align: start;
+    max-width: 300px;
   }
   .button {
     position: relative;
@@ -205,6 +206,22 @@ export default function Dashboard() {
       });
     }
   };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "dokumentasi"));
+        const docs = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setImages(docs);
+      } catch (error) {
+        console.error("Gagal mengambil data dokumentasi:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
   return (
     <StyledDashboard>
       <>
@@ -280,19 +297,29 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="gallery" ref={geser}>
-            {images.map((i) => (
-              <div key={i} className="card-image">
-                <img
-                  key={i}
-                  src={`https://picsum.photos/250/180?random=${1}`}
-                  alt={`Gambar ${i}`}
-                />
-                <div className="keterangan">
-                  <p>Kegiatan: </p>
-                  <p>Keterangan:</p>
+            {images
+              .slice(-4)
+              .reverse()
+              .map((item) => (
+                <div key={item.id} className="card-image">
+                  <img
+                    key={item}
+                    src={item.image || "path/to/default-image.jpg"}
+                    alt={`Gambar ${item}`}
+                    style={{
+                      width: "100%",
+                      maxHeight: "250px",
+                      objectFit: "cover",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  />
+                  <div className="keterangan">
+                    <p>Kegiatan: {item.kegiatan}</p>
+                    <p>Keterangan: {item.keterangan}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
           <div className="button">
             <button onClick={() => handleGeser("left")} className="left">
