@@ -74,10 +74,14 @@ const StyledDokumentasi = styled.div`
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     min-width: 100%;
   }
+  .galeri-wrap {
+    display: flex;
+    justify-content: center;
+  }
   .galeri {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 15px;
     justify-content: center;
     margin: 1rem;
   }
@@ -85,14 +89,18 @@ const StyledDokumentasi = styled.div`
     background-color: #53a548;
     padding: 8px;
     color: #fff;
+    min-width: 250px;
+    max-width: 250px;
     border-radius: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   .galeri-item img {
     width: 100%;
-    max-width: 250px;
+    max-height: 300px;
+    object-fit: cover;
     border-radius: 20px;
     margin-bottom: 10px;
+    display: block;
   }
   .action {
     display: flex;
@@ -112,9 +120,17 @@ const StyledDokumentasi = styled.div`
   }
 
   @media (min-width: 768px) {
+    .galeri {
+      gap: 10px;
+      justify-content: space-around;
+    }
   }
   @media (min-width: 1024px) {
     width: 1060px;
+    .galeri {
+      gap: 10px;
+      justify-content: space-around;
+    }
   }
 `;
 
@@ -230,45 +246,47 @@ export default function Dokumentasi({ isAdmin = true }) {
           </div>
         </div>
         <div className="galeri-container">
-          <div className="galeri">
-            {currentImages.length > 0 ? (
-              currentImages.map((item) => (
-                <div key={item.id} className="galeri-item">
-                  <img
-                    src={
-                      item.image && item.image !== ""
-                        ? item.image
-                        : "path/to/default-image.jpg"
-                    }
-                    alt={`Dokumentasi ${item.kegiatan}`}
-                  />
-                  <div className="caption">
-                    <p>
-                      <strong>{item.kegiatan}</strong>
-                    </p>
-                    <p>{item.keterangan}</p>
-                    {isAdmin && (
-                      <div className="action">
-                        <button
-                          onClick={() =>
-                            navigate("/form-dokumentasi", {
-                              state: { dokumentasi: item },
-                            })
-                          }
-                        >
-                          <img src={edit} alt="" />
-                        </button>
-                        <button onClick={() => setSelectedDataDelete(item)}>
-                          <img src={hapus} alt="" />
-                        </button>
-                      </div>
-                    )}
+          <div className="galeri-wrap">
+            <div className="galeri">
+              {currentImages.length > 0 ? (
+                currentImages.map((item) => (
+                  <div key={item.id} className="galeri-item">
+                    <img
+                      src={
+                        item.image && item.image !== ""
+                          ? item.image
+                          : "path/to/default-image.jpg"
+                      }
+                      alt={`Dokumentasi ${item.kegiatan}`}
+                    />
+                    <div className="caption">
+                      <p>
+                        <strong>{item.kegiatan}</strong>
+                      </p>
+                      <p>{item.keterangan}</p>
+                      {isAdmin && (
+                        <div className="action">
+                          <button
+                            onClick={() =>
+                              navigate("/form-dokumentasi", {
+                                state: { dokumentasi: item },
+                              })
+                            }
+                          >
+                            <img src={edit} alt="" />
+                          </button>
+                          <button onClick={() => setSelectedDataDelete(item)}>
+                            <img src={hapus} alt="" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <p style={{ padding: "1rem" }}>Tidak ada hasil ditemukan.</p>
-            )}
+                ))
+              ) : (
+                <p style={{ padding: "1rem" }}>Tidak ada hasil ditemukan.</p>
+              )}
+            </div>
           </div>
         </div>
         {selectedDataDelete && (

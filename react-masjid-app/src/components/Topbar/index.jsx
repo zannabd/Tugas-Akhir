@@ -11,6 +11,7 @@ const StyledTopbar = styled.div`
   display: flex;
   justify-content: space-between;
   height: 70px;
+  min-width: 100%;
   .brand {
     display: flex;
   }
