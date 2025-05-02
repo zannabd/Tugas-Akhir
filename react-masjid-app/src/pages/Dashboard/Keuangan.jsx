@@ -250,7 +250,7 @@ export default function Keuangan({ isAdmin = true }) {
             <thead>
               <tr>
                 <th>No.</th>
-                <th>Detail</th>
+                {/* <th>Detail</th> */}
                 <th>Tanggal</th>
                 <th>Pendapatan</th>
                 <th>Pengeluahan</th>
@@ -262,10 +262,10 @@ export default function Keuangan({ isAdmin = true }) {
               {filterData.map((item, index) => (
                 <tr key={item.id}>
                   <td style={{ textAlign: "center" }}>{index + 1}</td>
-                  <td>
+                  {/* <td>
                     {" "}
                     {item.detail && <FilePreview fileUrl={item.detail} />}
-                  </td>
+                  </td> */}
                   <td>{item.tanggal}</td>
                   <td>
                     {item.pendapatan ? formatRupiah(item.pendapatan) : "Rp 0"}

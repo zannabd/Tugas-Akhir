@@ -147,9 +147,9 @@ export default function AddFormKeuangan({ onCreate }) {
   const keuanganToEdit = location.state?.keuangan;
   const [file, setFile] = useState(null);
   const [uploadUrl, setUploadUrl] = useState("");
-  const [detail, setDetail] = useState(
-    keuanganToEdit ? { name: keuanganToEdit.detail } : null
-  );
+  // const [detail, setDetail] = useState(
+  //   keuanganToEdit ? { name: keuanganToEdit.detail } : null
+  // );
   const [tanggal, setTanggal] = useState(keuanganToEdit?.tanggal || "");
   const [pendapatan, setPendapatan] = useState(
     keuanganToEdit?.pendapatan || ""
@@ -164,37 +164,37 @@ export default function AddFormKeuangan({ onCreate }) {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("");
 
-  const uploadDetail = async (file, folderName) => {
-    const detailKeuangan = new FormData();
-    detailKeuangan.append("file", file);
-    detailKeuangan.append("upload_preset", uploadPreset);
-    detailKeuangan.append("resource_type", "raw");
-    detailKeuangan.append("folder", folderName);
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
-      {
-        method: "POST",
-        body: detailKeuangan,
-      }
-    );
-    const data = await res.json();
-    setUploadUrl(data.secure_url);
-    return data.secure_url;
-  };
+  // const uploadDetail = async (file, folderName) => {
+  //   const detailKeuangan = new FormData();
+  //   detailKeuangan.append("file", file);
+  //   detailKeuangan.append("upload_preset", uploadPreset);
+  //   detailKeuangan.append("resource_type", "raw");
+  //   detailKeuangan.append("folder", folderName);
+  //   const res = await fetch(
+  //     `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
+  //     {
+  //       method: "POST",
+  //       body: detailKeuangan,
+  //     }
+  //   );
+  //   const data = await res.json();
+  //   setUploadUrl(data.secure_url);
+  //   return data.secure_url;
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tanggal || !pendapatan || !pengeluaran || !saldoTotal) return;
 
     try {
-      let fileUrl = "";
+      // let fileUrl = "";
 
-      if (detail) {
-        fileUrl = await uploadDetail(detail, "keuangan");
-      }
+      // if (detail) {
+      //   fileUrl = await uploadDetail(detail, "keuangan");
+      // }
 
       const newKeuangan = {
-        detail: fileUrl || "",
+        // detail: fileUrl || "",
         tanggal,
         pendapatan: Number(pendapatan),
         pengeluaran: Number(pengeluaran),
@@ -215,7 +215,7 @@ export default function AddFormKeuangan({ onCreate }) {
         setAlertType("success");
       }
 
-      setDetail(null);
+      // setDetail(null);
       setTanggal("");
       setPendapatan("");
       setPengeluaran("");
@@ -232,8 +232,8 @@ export default function AddFormKeuangan({ onCreate }) {
 
   const onDrop = (acceptedFiles) => {
     const file = acceptedFiles[0];
-    setDetail(file); // Simpan file yang di-upload
-    uploadDetail(file, "keuangan");
+    // setDetail(file); // Simpan file yang di-upload
+    // uploadDetail(file, "keuangan");
   };
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -268,13 +268,13 @@ export default function AddFormKeuangan({ onCreate }) {
             </div>
           )}
           <form onSubmit={handleSubmit}>
-            <div className="file-input" {...getRootProps()}>
+            {/* <div className="file-input" {...getRootProps()}>
               <input {...getInputProps()} />
               <p>
                 Drag & drop a file here, or click to select CSV, XLSX, or PDF
               </p>
               {detail && <p>File selected: {detail.name}</p>}
-            </div>
+            </div> */}
 
             <input
               id="tanggal"
