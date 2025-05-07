@@ -65,6 +65,11 @@ const StyledForm = styled.div`
   .submit:hover {
     background: #19381f;
   }
+  @media (min-width: 1024px) {
+    .main {
+      width: 50%;
+    }
+  }
 `;
 
 export default function AddFormDokumentasi({ onCreate }) {

@@ -128,8 +128,8 @@ const StyledForm = styled.div`
     .main {
       margin-top: 1rem;
       width: 50%;
-      height: 90%;
-      top: 10%;
+      height: 65%;
+      top: 20%;
     }
     input {
       margin: 15px auto;

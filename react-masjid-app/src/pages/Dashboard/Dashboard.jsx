@@ -22,11 +22,11 @@ const StyledDashboard = styled.div`
     padding: 16px;
     margin: 10px;
     border: 1px solid grey;
-    justify-content: space-between; 
+    justify-content: space-between;
   }
   .stat-info {
     display: flex;
-align-self: center;
+    align-self: center;
   }
   .stat-icon {
     width: 35px;
@@ -85,6 +85,8 @@ align-self: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border-radius: 12px;
     overflow: hidden;
+    font-size: 20px;
+    color: #555;
   }
   .gallery {
     display: flex;
@@ -138,13 +140,21 @@ align-self: center;
     }
   }
   @media (min-width: 1024px) {
-  max-width: 89%;
+    max-width: 89%;
     .card1 {
       display: flex;
       justify-content: space-between;
     }
     .stat-card {
-      width: 500px;
+      min-width: 54%;
+    }
+    .currentActivity {
+      min-width: 110%;
+    }
+    .dokumentasi {
+      min-width: 110%;
+      margin-top: 1rem;
+    }
   }
 `;
 export default function Dashboard() {
