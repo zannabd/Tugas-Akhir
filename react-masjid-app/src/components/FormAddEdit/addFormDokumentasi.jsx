@@ -65,9 +65,35 @@ const StyledForm = styled.div`
   .submit:hover {
     background: #19381f;
   }
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+  }
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 5px solid #e0e0e0;
+    border-top: 5px solid #4c934c;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  .loading-info {
+    font-weight: bold;
+    color: #4c934c;
+  }
   @media (min-width: 1024px) {
     .main {
       width: 50%;
+    }
+  }
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
     }
   }
 `;
@@ -191,7 +217,8 @@ export default function AddFormDokumentasi({ onCreate }) {
         )}
         {loading ? ( // Tampilkan spinner saat loading
           <div className="loading-container">
-            <div className="loading-spinner"></div> {/* Spinner */}
+            <div className="loading-spinner"></div>
+            <p className="loading-info">Mengupload data...</p> {/* Spinner */}
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
