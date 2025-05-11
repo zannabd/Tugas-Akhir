@@ -173,18 +173,12 @@ export default function Kegiatan({ isAdmin = true }) {
 
   const handleDelete = async (id) => {
     try {
-      // Cek dokumen yang ingin dihapus
-      console.log("ID yang dikirim untuk dihapus:", id);
       const docRef = doc(db, "kegiatan", id);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        console.log("Dokumen ditemukan, melanjutkan penghapusan");
-
         // Hapus dokumen jika ditemukan
         await deleteDoc(docRef);
-
-        console.log(`Kegiatan dengan ID ${id} berhasil dihapus dari Firestore`);
         setAlertMessage("Kegiatan berhasil dihapus!");
         setAlertType("success");
         setTimeout(() => {

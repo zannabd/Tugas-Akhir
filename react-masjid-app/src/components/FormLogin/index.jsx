@@ -92,17 +92,33 @@ export default function FormLogin() {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("");
 
+  const SUPER_ADMIN_UID = import.meta.env.VITE_FIREBASE_SUPER_ADMIN_UID;
+
   const handleLogin = (e) => {
     e.preventDefault();
     signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
         // Signed in
         const user = userCredential.user;
-        setAlertMessage("Login berhasil!");
-        setAlertType("success");
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 1000);
+        try {
+          // Ambil token ID untuk verifikasi
+          const token = await user.getIdTokenResult();
+
+          // Cek apakah UID-nya sama dengan Super Admin
+          if (user.uid === SUPER_ADMIN_UID) {
+            setAlertMessage("Login berhasil!");
+            setAlertType("success");
+            setTimeout(() => {
+              navigate("/dashboard");
+            }, 1000);
+          } else {
+            setAlertMessage("Akses ditolak. Anda bukan admin.");
+            setAlertType("danger");
+          }
+        } catch (error) {
+          setAlertMessage("Error verifikasi token");
+          setAlertType("danger");
+        }
       })
       .catch((error) => {
         const errorCode = error.code;
