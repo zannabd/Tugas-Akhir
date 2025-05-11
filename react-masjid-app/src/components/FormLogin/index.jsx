@@ -2,7 +2,11 @@ import styled from "styled-components";
 import left from "../../images/left-white.png";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
 import { auth } from "../../firebase";
 
 const StyledForm = styled.div`
@@ -96,15 +100,14 @@ export default function FormLogin() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    signInWithEmailAndPassword(auth, email, password)
+
+    setPersistence(auth, browserSessionPersistence)
+      .then(() => {
+        return signInWithEmailAndPassword(auth, email, password);
+      })
       .then(async (userCredential) => {
-        // Signed in
         const user = userCredential.user;
         try {
-          // Ambil token ID untuk verifikasi
-          const token = await user.getIdTokenResult();
-
-          // Cek apakah UID-nya sama dengan Super Admin
           if (user.uid === SUPER_ADMIN_UID) {
             setAlertMessage("Login berhasil!");
             setAlertType("success");
