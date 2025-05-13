@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logo from "../../assets/Al-Ihsan.png";
 import profile from "../../images/admin-profile.png";
 import logout from "../../images/logout.png";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase";
 
 const StyledTopbar = styled.div`
   background: #53a548;
   display: flex;
   justify-content: space-between;
-  height: 70px;
+  height: 75px;
   min-width: 100%;
   .brand {
     display: flex;
@@ -25,14 +27,20 @@ const StyledTopbar = styled.div`
     border-radius: 10px;
     margin: 0.5rem 0.8rem;
   }
+  .profile-info {
+    display: flex;
+    justify-content: center;
+  }
   .profile-img {
-    max-width: 40px;
-    height: 40px;
-    margin-right: 20px;
+    max-width: 35px;
+    height: 35px;
+    margin-bottom: 0px;
+    margin-top: 20px;
   }
   .profile-section {
     position: relative;
     align-self: center;
+    align-items: center;
   }
   h1 {
     color: #fff;
@@ -85,12 +93,33 @@ const StyledTopbar = styled.div`
     .brand h1 {
       font-size: 30px;
     }
+    .profile-img {
+      margin-right: 35px;
+      width: 40px;
+    }
   }
 `;
 export default function Topbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserInfo(docSnap.data());
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const handleLogout = async () => {
     const auth = getAuth();
     try {
@@ -112,11 +141,15 @@ export default function Topbar() {
           <div className="profile-info">
             <button onClick={() => setMenuOpen(!menuOpen)}>
               <img src={profile} alt="Profile" className="profile-img" />
+              <p style={{ color: "white", textAlign: "center" }}>
+                {" "}
+                {userInfo ? `${userInfo.nama || userInfo.role}` : "Admin"}
+              </p>
             </button>
           </div>
           <div className={`logout ${menuOpen ? "show" : ""}`}>
             <h3 className="d-flex justify-content-center">
-              <i>Admin</i>
+              <i>{userInfo ? `${userInfo.nama || userInfo.role}` : "Admin"}</i>
             </h3>
             <button
               onClick={() => setShowModal(true)}

@@ -7,7 +7,9 @@ import {
   setPersistence,
   browserSessionPersistence,
 } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { auth } from "../../firebase";
+import { db } from "../../firebase";
 
 const StyledForm = styled.div`
   background: linear-gradient(to bottom, #19381f, #53a548, #4c934c);
@@ -88,15 +90,13 @@ const StyledForm = styled.div`
     }
   }
 `;
-const users = [{ email: "admin@gmail.com", password: "12345" }];
+
 export default function FormLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("");
-
-  const SUPER_ADMIN_UID = import.meta.env.VITE_FIREBASE_SUPER_ADMIN_UID;
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -107,18 +107,30 @@ export default function FormLogin() {
       })
       .then(async (userCredential) => {
         const user = userCredential.user;
+
         try {
-          if (user.uid === SUPER_ADMIN_UID) {
-            setAlertMessage("Login berhasil!");
-            setAlertType("success");
-            setTimeout(() => {
-              navigate("/dashboard");
-            }, 1000);
+          // Ambil data pengguna dari Firestore berdasarkan UID
+          const userDocRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            const userRole = userDoc.data().role;
+            if (userRole === "admin") {
+              setAlertMessage("Login berhasil!");
+              setAlertType("success");
+              setTimeout(() => {
+                navigate("/dashboard");
+              }, 1000);
+            } else {
+              setAlertMessage("Akses ditolak. Anda bukan admin.");
+              setAlertType("danger");
+            }
           } else {
-            setAlertMessage("Akses ditolak. Anda bukan admin.");
+            setAlertMessage("Pengguna tidak ditemukan");
             setAlertType("danger");
           }
         } catch (error) {
+          console.log("Error detail:", error);
           setAlertMessage("Error verifikasi token");
           setAlertType("danger");
         }
