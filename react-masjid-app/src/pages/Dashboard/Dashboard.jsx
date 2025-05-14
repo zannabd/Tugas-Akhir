@@ -129,6 +129,7 @@ const StyledDashboard = styled.div`
   }
   @media (min-width: 768px) {
     .card1 {
+      min-width: 100%;
       display: flex;
       justify-content: space-between;
     }

@@ -41,7 +41,7 @@ const StyledForm = styled.div`
   }
   .main {
     background: #ffffff;
-    position: absolute;
+    position: relative;
     width: 70%;
     height: 80%;
     display: flex;

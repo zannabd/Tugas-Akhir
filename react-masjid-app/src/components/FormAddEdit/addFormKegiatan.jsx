@@ -30,7 +30,7 @@ const StyledForm = styled.div`
   }
   .main {
     background: #ffffff;
-    position: absolute;
+    position: relative;
     width: 60%;
     height: 60%;
     display: flex;
@@ -79,7 +79,7 @@ const StyledForm = styled.div`
 
   @media (min-width: 768px) {
     h1 {
-      margin-top: 6rem;
+      margin: 1.5rem;
     }
     form {
       margin-top: 2rem;

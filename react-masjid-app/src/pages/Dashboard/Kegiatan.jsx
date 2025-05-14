@@ -92,11 +92,11 @@ const StyledKegiatan = styled.div`
     margin-top: 15px;
     padding: 16px;
     overflow-x: auto;
-    width: 100%;
+    min-width: 100%;
     -webkit-overflow-scrolling: touch;
   }
   table {
-    min-width: 600px;
+    min-width: 100%;
   }
   th {
     background-color: #53a548;
@@ -130,10 +130,7 @@ const StyledKegiatan = styled.div`
     }
   }
   @media (min-width: 1024px) {
-    max-width: 100%;
-    .desc {
-      width: 1055px;
-    }
+    min-width: 100%;
     table {
       width: 100%;
     }

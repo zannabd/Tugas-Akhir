@@ -36,7 +36,7 @@ const StyledForm = styled.div`
   }
   .main {
     background: #ffffff;
-    position: absolute;
+    position: relative;
     width: 60%;
     height: 50%;
     top: 25%;

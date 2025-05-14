@@ -126,7 +126,7 @@ const StyledDokumentasi = styled.div`
     }
   }
   @media (min-width: 1024px) {
-    width: 1060px;
+    min-width: 100%;
     .galeri {
       gap: 10px;
       justify-content: space-around;
