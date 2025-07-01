@@ -96,7 +96,7 @@ const StyledKegiatan = styled.div`
     -webkit-overflow-scrolling: touch;
   }
   table {
-    min-width: 100%;
+    min-width: 600px;
   }
   th {
     background-color: #53a548;
